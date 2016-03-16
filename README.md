@@ -1,12 +1,17 @@
-## DPRS - Amazon Dynamo
-**Autori:** Jozef Zatko, Daniel Valocky, Richard Pastorek
+## DPRS projekt
+**Implementácia distribuovanej key-value databázy inšpirovanú Amazon Dynamo**
 
-#### Info o projekte
-Hodnotenie: 40b
-- 6 tyzden - zakladna infrastruktura - 10b
-- 12 tyzden - 30b
+#### Autori:
+- Jozef Zaťko
+- Daniel Valocký
+- Richard Pastorek
 
-#### Dokumentacia
-**Oficialna dokumentacia Amazon Dynamo:** http://aws.amazon.com/documentation/dynamodb/
+**Zadanie:** https://github.com/jozefzatko/dprs/blob/master/zadanie.md
 
-**Docker:** https://www.docker.com/
+#### Použité technológie
+* **Docker:** https://www.docker.com/
+* **Docker Swarm:** https://docs.docker.com/swarm/networking/
+* **Nginx:** http://nginx.org/
+* **Consul:** https://www.consul.io/
+* **Consul Template:** https://github.com/hashicorp/consul-template/
+* **Spark:** http://sparkjava.com/
