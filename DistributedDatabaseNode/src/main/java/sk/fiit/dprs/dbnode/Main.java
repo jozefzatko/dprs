@@ -2,6 +2,8 @@ package sk.fiit.dprs.dbnode;
 
 import static spark.Spark.*;
 
+import java.util.UUID;
+
 import sk.fiit.dprs.dbnode.api.NodeAPIController;
 import sk.fiit.dprs.dbnode.api.UserAPIController;
 
@@ -15,9 +17,11 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		port(4567);
+		port(4568);
 		
-		new NodeAPIController();
-		new UserAPIController();
+		String id = UUID.randomUUID().toString();
+		
+		new NodeAPIController(id);
+		new UserAPIController(id);
 	}
 }

@@ -1,5 +1,8 @@
 package sk.fiit.dprs.dbnode.api;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import com.google.gson.Gson;
 
 import sk.fiit.dprs.dbnode.api.services.PingRequestor;
@@ -114,5 +117,12 @@ public class UserAPIRequestProcessing {
 		} catch (Exception e) {
 			throw new CannotPingNodeException();
 		}
+	}
+
+	public static String getNodeInfo(String id) throws UnknownHostException {
+		
+		String ip = InetAddress.getLocalHost().getHostAddress();
+		
+		return "[{ipAdress:" + ip + "},{customID:" + id + "}]";
 	}
 }

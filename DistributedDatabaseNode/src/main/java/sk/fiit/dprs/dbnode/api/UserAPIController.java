@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class UserAPIController {
 
-	public UserAPIController() {
+	public UserAPIController(String id) {
 
 		/*
 		 * READ from DB
@@ -78,6 +78,15 @@ public class UserAPIController {
 			return "Status: OK\n" + new Date().toString();
 		});
 		
+		/*
+		 * INFO of node
+		 * 
+		 * GET http://localhost:4567/info
+		 */
+		get("/info", (request, response) -> {
+						
+			return UserAPIRequestProcessing.getNodeInfo(id);
+		});
 		
 		/*
 		 * Exception handling

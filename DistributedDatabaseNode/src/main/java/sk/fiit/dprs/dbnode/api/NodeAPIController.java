@@ -7,7 +7,7 @@ package sk.fiit.dprs.dbnode.api;
  */
 public class NodeAPIController {
 
-	public NodeAPIController() {
+	public NodeAPIController(String id) {
 
 	}
 }
