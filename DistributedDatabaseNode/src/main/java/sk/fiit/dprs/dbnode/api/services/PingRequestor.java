@@ -1,7 +1,10 @@
 package sk.fiit.dprs.dbnode.api.services;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
- * Handle ping concrete database node
+ * Handle a ping requests
  * 
  * @author Jozef Zatko
  */
@@ -26,9 +29,23 @@ public class PingRequestor {
 	 * @return ping message
 	 * @throws Exception
 	 */
-	public String pingAllNodes() throws Exception {
+	public String pingAllNodes(String consulURL) throws Exception {
 
-		return "Not implemented yet.";
+		//String allNodes = "[{\"ServiceAddress\":\"127.0.0.1\",\"ServicePort\":\"5001\"},{\"ServiceAddress\":\"127.0.0.1\",\"ServicePort\":\"5002\"}]";
+		String allNodes = new RESTRequestor("GET", consulURL + "/v1/catalog/service/dbnode").request();
+		
+		JSONArray jsonArray = new JSONArray(allNodes);
+		
+		String pingResponse = "";
+		JSONObject jsonObj;
+	
+		for(int i=0; i<jsonArray.length(); i++) {
+				
+			jsonObj = (JSONObject) jsonArray.get(i);
+			pingResponse += ping("http://" + jsonObj.getString("ServiceAddress") + ":" + jsonObj.getString("ServicePort"), "/ping") + "\n";
+		}
+		
+		return pingResponse;
 	}
 	
 	/**

@@ -17,11 +17,11 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		port(4568);
+		port(4567);
 		
 		String id = UUID.randomUUID().toString();
 		
-		new NodeAPIController(id);
-		new UserAPIController(id);
+		new NodeAPIController(id, args[0]);
+		new UserAPIController(id, args[0]);
 	}
 }

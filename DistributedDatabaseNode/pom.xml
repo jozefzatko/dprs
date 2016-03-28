@@ -33,6 +33,13 @@
 			<version>4.11</version>
 		</dependency>
 		
+		<!-- JSON parser -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20160212</version>
+		</dependency>
+		
 		<!-- Google GSON to create JSON from any object -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

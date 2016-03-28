@@ -110,10 +110,10 @@ public class UserAPIRequestProcessing {
 	 * @return ping info
 	 * @throws CannotPingNodeException any fail during ping
 	 */
-	public static String pingAllNodes() throws CannotPingNodeException {
+	public static String pingAllNodes(String consulURL) throws CannotPingNodeException {
 		
 		try {
-			return new PingRequestor().pingAllNodes();
+			return new PingRequestor().pingAllNodes(consulURL);
 		} catch (Exception e) {
 			throw new CannotPingNodeException();
 		}

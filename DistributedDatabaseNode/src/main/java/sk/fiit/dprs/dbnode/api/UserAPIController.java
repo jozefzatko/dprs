@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class UserAPIController {
 
-	public UserAPIController(String id) {
+	public UserAPIController(String id, String consulURL) {
 
 		/*
 		 * READ from DB
@@ -63,9 +63,9 @@ public class UserAPIController {
 		 * 
 		 * GET http://localhost:4567/ping
 		 */
-		get("/ping", (request, response) -> {
+		get("/pingall", (request, response) -> {
 			
-			return UserAPIRequestProcessing.pingAllNodes();
+			return UserAPIRequestProcessing.pingAllNodes(consulURL);
 		});
 		
 		/*
