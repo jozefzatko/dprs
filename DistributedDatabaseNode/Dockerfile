@@ -19,4 +19,4 @@ RUN ["mvn", "package"]
 
 # Run application on port 4567
 EXPOSE 4567
-CMD ["/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "/workdir/target/distributed-database-node-jar-with-dependencies.jar"] 
+CMD ["/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "/workdir/target/dbnode-jar-with-dependencies.jar"] 
