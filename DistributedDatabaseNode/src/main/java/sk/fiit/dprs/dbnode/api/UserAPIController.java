@@ -4,6 +4,8 @@ import static spark.Spark.*;
 
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 /**
  * User-to-Node API setup and controlling
  * 
@@ -11,6 +13,8 @@ import java.util.Date;
  */
 public class UserAPIController {
 
+	static Logger log = Logger.getLogger(UserAPIController.class.getName());
+	
 	public UserAPIController(String id, String consulURL) {
 
 		/*
@@ -21,6 +25,7 @@ public class UserAPIController {
 		 */
 		get("/data/:key", (request, response) -> {
 			
+			log.info(request.requestMethod() + " " + request.url());
 			return UserAPIRequestProcessing.get(request.params(":key"), request.queryParams("quorum"));
 		});
 
@@ -32,6 +37,7 @@ public class UserAPIController {
 		 */
 		post("/data/:key/:value", (request, response) -> {
 			
+			log.info(request.requestMethod() + " " + request.url());
 			return UserAPIRequestProcessing.createOrUpdate(request.params(":key"), request.params(":value"),
 						request.queryParams("quorum"), request.queryParams("vclock"));
 		});
@@ -44,6 +50,7 @@ public class UserAPIController {
 		 */
 		delete("/data/:key", (request, response) -> {
 			
+			log.info(request.requestMethod() + " " + request.url());
 			return UserAPIRequestProcessing.delete(request.params(":key"),request.queryParams("quorum"),
 						request.queryParams("vclock"));
 		});
@@ -55,6 +62,7 @@ public class UserAPIController {
 		 */
 		get("/ping/:adress", (request, response) -> {
 			
+			log.info(request.requestMethod() + " " + request.url());
 			return UserAPIRequestProcessing.pingNode(request.params(":adress"));
 		});
 		
@@ -65,6 +73,7 @@ public class UserAPIController {
 		 */
 		get("/pingall", (request, response) -> {
 			
+			log.info(request.requestMethod() + " " + request.url());
 			return UserAPIRequestProcessing.pingAllNodes(consulURL);
 		});
 		
@@ -74,7 +83,8 @@ public class UserAPIController {
 		 * GET http://localhost:4567/ping
 		 */
 		get("/ping", (request, response) -> {
-						
+			
+			log.info(request.requestMethod() + " " + request.url());
 			return "Status: OK\n" + new Date().toString();
 		});
 		
@@ -84,7 +94,8 @@ public class UserAPIController {
 		 * GET http://localhost:4567/info
 		 */
 		get("/info", (request, response) -> {
-						
+			
+			log.info(request.requestMethod() + " " + request.url());
 			return UserAPIRequestProcessing.getNodeInfo(id);
 		});
 		
@@ -92,6 +103,8 @@ public class UserAPIController {
 		 * Exception handling
 		 */
 		exception(Exception.class, (e, request, response) -> {
+			
+			log.info(request.requestMethod() + " " + request.url());
 			
 			response.status(400);
 			response.body(e.toString());

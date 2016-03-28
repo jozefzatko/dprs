@@ -4,6 +4,8 @@ import static spark.Spark.*;
 
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
 import sk.fiit.dprs.dbnode.api.NodeAPIController;
 import sk.fiit.dprs.dbnode.api.UserAPIController;
 
@@ -15,13 +17,25 @@ import sk.fiit.dprs.dbnode.api.UserAPIController;
  */
 public class Main {
 	
+	static Logger log = Logger.getLogger(Main.class.getName());
+	
 	public static void main(String[] args) {
 		
 		port(4567);
-		
 		String id = UUID.randomUUID().toString();
 		
-		new NodeAPIController(id, args[0]);
-		new UserAPIController(id, args[0]);
+		try {
+			
+			log.info("Starting dbnode on port 4567 with CONSUL_URL " + args[0]);
+			
+			new NodeAPIController(id, args[0]);
+			new UserAPIController(id, args[0]);
+		
+		} catch(Exception e) {
+			e.printStackTrace();
+			
+			new NodeAPIController(id, "");
+			new UserAPIController(id, "");
+		}
 	}
 }

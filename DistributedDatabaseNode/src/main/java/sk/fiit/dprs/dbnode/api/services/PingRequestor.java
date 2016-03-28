@@ -1,7 +1,10 @@
 package sk.fiit.dprs.dbnode.api.services;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import sk.fiit.dprs.dbnode.Main;
 
 /**
  * Handle a ping requests
@@ -9,6 +12,8 @@ import org.json.JSONObject;
  * @author Jozef Zatko
  */
 public class PingRequestor {
+	
+	static Logger log = Logger.getLogger(Main.class.getName());
 	
 	/**
 	 * Ping concrete database node
@@ -19,6 +24,8 @@ public class PingRequestor {
 	public String ping(String adress, String RESTaddr) throws Exception {
 		
 		double pingTime = getPingTime(adress, RESTaddr);
+		
+		log.info("Ping to node http://" + adress);
 		
 		return "Ping to node http://" + adress + " was successful. Time: " + pingTime + " ms.";
 	}
@@ -31,8 +38,12 @@ public class PingRequestor {
 	 */
 	public String pingAllNodes(String consulURL) throws Exception {
 
+		log.info("Requesting dbnode instances to consul.\n" + "GET " + consulURL + "/v1/catalog/service/dbnode");
+		
 		//String allNodes = "[{\"ServiceAddress\":\"127.0.0.1\",\"ServicePort\":\"5001\"},{\"ServiceAddress\":\"127.0.0.1\",\"ServicePort\":\"5002\"}]";
 		String allNodes = new RESTRequestor("GET", consulURL + "/v1/catalog/service/dbnode").request();
+		
+		log.info(allNodes);
 		
 		JSONArray jsonArray = new JSONArray(allNodes);
 		
