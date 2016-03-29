@@ -49,7 +49,12 @@ public class PingRequestor {
 		for(int i=0; i<jsonArray.length(); i++) {
 				
 			jsonObj = jsonArray.getJSONObject(i);
-			pingResponse += ping("http://" + jsonObj.getString("ServiceAddress") + ":" + ((int)jsonObj.get("ServicePort")), "/ping") + "\n";
+			
+			try {
+				pingResponse += ping("http://" + jsonObj.getString("ServiceAddress") + ":" + ((int)jsonObj.get("ServicePort")), "/ping") + "\n";
+			} catch(Exception e) {
+				pingResponse += "Cannot ping node " + jsonObj.getString("ServiceAddress") + ":" + ((int)jsonObj.get("ServicePort"));
+			}
 		}
 		
 		return pingResponse;
