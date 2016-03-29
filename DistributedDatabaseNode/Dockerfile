@@ -17,8 +17,6 @@ RUN ["mvn", "verify"]
 ADD src /workdir/src
 RUN ["mvn", "package"]
 
-ENV CONSUL_URL 127.0.0.1:8500
-
 # Run application on port 4567
 EXPOSE 4567
-CMD ["/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "/workdir/target/dbnode-jar-with-dependencies.jar", "CONSUL_URL"] 
+ENTRYPOINT ["/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "/workdir/target/dbnode-jar-with-dependencies.jar"]

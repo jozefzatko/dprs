@@ -7,6 +7,10 @@ package sk.fiit.dprs.dbnode.exceptions;
  */
 public class CannotPingNodeException extends Exception {
 
+	public CannotPingNodeException(Exception e) {
+		super(e);
+	}
+
 	/**
 	 * 
 	 */

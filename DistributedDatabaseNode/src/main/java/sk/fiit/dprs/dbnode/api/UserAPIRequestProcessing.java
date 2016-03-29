@@ -99,8 +99,8 @@ public class UserAPIRequestProcessing {
 		
 		try {
 			return new PingRequestor().ping("http://" + adress, "/ping");
-		} catch (Exception e) {
-			throw new CannotPingNodeException();
+		} catch(Exception e) {
+			throw new CannotPingNodeException(e);
 		}
 	}
 	
@@ -110,13 +110,14 @@ public class UserAPIRequestProcessing {
 	 * @return ping info
 	 * @throws CannotPingNodeException any fail during ping
 	 */
-	public static String pingAllNodes(String consulURL) throws CannotPingNodeException {
+	public static String pingAllNodes(String consulURL) throws Exception {
 		
 		try {
 			return new PingRequestor().pingAllNodes(consulURL);
-		} catch (Exception e) {
-			throw new CannotPingNodeException();
+		} catch(Exception e) {
+			throw new CannotPingNodeException(e);
 		}
+		
 	}
 
 	public static String getNodeInfo(String id) throws UnknownHostException {

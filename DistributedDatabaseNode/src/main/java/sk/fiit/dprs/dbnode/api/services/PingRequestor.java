@@ -1,5 +1,7 @@
 package sk.fiit.dprs.dbnode.api.services;
 
+import java.net.InetAddress;
+
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,10 +26,8 @@ public class PingRequestor {
 	public String ping(String adress, String RESTaddr) throws Exception {
 		
 		double pingTime = getPingTime(adress, RESTaddr);
-		
-		log.info("Ping to node http://" + adress);
-		
-		return "Ping to node http://" + adress + " was successful. Time: " + pingTime + " ms.";
+		log.info("Ping from node " + InetAddress.getLocalHost().getHostAddress() + "to node http://" + adress + " was successful. Time: " + pingTime + " ms.");
+		return "Ping from node " + InetAddress.getLocalHost().getHostAddress() + "to node http://" + adress + " was successful. Time: " + pingTime + " ms.";
 	}
 	
 	/**
@@ -37,23 +37,19 @@ public class PingRequestor {
 	 * @throws Exception
 	 */
 	public String pingAllNodes(String consulURL) throws Exception {
-
-		log.info("Requesting dbnode instances to consul.\n" + "GET " + consulURL + "/v1/catalog/service/dbnode");
 		
-		//String allNodes = "[{\"ServiceAddress\":\"127.0.0.1\",\"ServicePort\":\"5001\"},{\"ServiceAddress\":\"127.0.0.1\",\"ServicePort\":\"5002\"}]";
-		String allNodes = new RESTRequestor("GET", consulURL + "/v1/catalog/service/dbnode").request();
-		
-		log.info(allNodes);
+		log.info("Request: GET http://" + consulURL + "/v1/catalog/service/dbnode");
+		String allNodes = new RESTRequestor("GET", "http://" + consulURL + "/v1/catalog/service/dbnode").request();
+		log.info("Response: " + allNodes);
 		
 		JSONArray jsonArray = new JSONArray(allNodes);
-		
-		String pingResponse = "";
 		JSONObject jsonObj;
+		String pingResponse = "";
 	
 		for(int i=0; i<jsonArray.length(); i++) {
 				
-			jsonObj = (JSONObject) jsonArray.get(i);
-			pingResponse += ping("http://" + jsonObj.getString("ServiceAddress") + ":" + jsonObj.getString("ServicePort"), "/ping") + "\n";
+			jsonObj = jsonArray.getJSONObject(i);
+			pingResponse += ping("http://" + jsonObj.getString("ServiceAddress") + ":" + ((int)jsonObj.get("ServicePort")), "/ping") + "\n";
 		}
 		
 		return pingResponse;
@@ -62,15 +58,13 @@ public class PingRequestor {
 	/**
 	 * Ping concrete database node
 	 * 
-	 * @return time in millis
+	 * @return time in milliseconds
 	 * @throws Exception
 	 */
 	private double getPingTime(String adress, String RESTaddr) throws Exception {
 		
-		double timeStart = System.currentTimeMillis();
-		
+		double timeStart = System.currentTimeMillis();		
 		new RESTRequestor("GET", adress + RESTaddr).request();
-
 		return (System.currentTimeMillis() - timeStart) / 2.0;
 	}
 }
