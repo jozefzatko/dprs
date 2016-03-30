@@ -48,10 +48,6 @@ public class RESTRequestor {
 		}
 			
 		conn.disconnect();
-
-		if("".equals(responseMsg)) {
-			throw new RuntimeException("Cannot ping " + this.requestUrl);
-		}
 		
 		return responseMsg;
 	}

@@ -117,7 +117,21 @@ public class UserAPIRequestProcessing {
 		} catch(Exception e) {
 			throw new CannotPingNodeException(e);
 		}
+	}
+	
+	/**
+	 * Ping all healthy nodes of distributed database
+	 * 
+	 * @return ping info
+	 * @throws CannotPingNodeException any fail during ping
+	 */
+	public static String pingHealthyNodes(String consulURL) throws Exception {
 		
+		try {
+			return new PingRequestor().pingHealthyNodes(consulURL);
+		} catch(Exception e) {
+			throw new CannotPingNodeException(e);
+		}
 	}
 
 	public static String getNodeInfo(String id) throws UnknownHostException {

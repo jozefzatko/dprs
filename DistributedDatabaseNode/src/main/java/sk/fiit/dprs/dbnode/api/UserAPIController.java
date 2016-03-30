@@ -69,12 +69,23 @@ public class UserAPIController {
 		/*
 		 * PING all database nodes through request of other node
 		 * 
-		 * GET http://localhost:4567/ping
+		 * GET http://localhost:4567/pingall
 		 */
 		get("/pingall", (request, response) -> {
 			
 			log.info(request.requestMethod() + " " + request.url());
 			return UserAPIRequestProcessing.pingAllNodes(consulURL);
+		});
+		
+		/*
+		 * PING all healthy database nodes through request of other node
+		 * 
+		 * GET http://localhost:4567/pinghealthy
+		 */
+		get("/pinghealthy", (request, response) -> {
+			
+			log.info(request.requestMethod() + " " + request.url());
+			return UserAPIRequestProcessing.pingHealthyNodes(consulURL);
 		});
 		
 		/*

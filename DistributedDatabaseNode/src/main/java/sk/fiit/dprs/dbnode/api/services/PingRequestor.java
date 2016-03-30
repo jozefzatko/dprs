@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import sk.fiit.dprs.dbnode.Main;
+import sk.fiit.dprs.dbnode.healthcheck.HealthCheckParser;
 
 /**
  * Handle a ping requests
@@ -26,8 +27,8 @@ public class PingRequestor {
 	public String ping(String adress, String RESTaddr) throws Exception {
 		
 		double pingTime = getPingTime(adress, RESTaddr);
-		log.info("Ping from node " + InetAddress.getLocalHost().getHostAddress() + "to node http://" + adress + " was successful. Time: " + pingTime + " ms.");
-		return "Ping from node " + InetAddress.getLocalHost().getHostAddress() + "to node http://" + adress + " was successful. Time: " + pingTime + " ms.";
+		log.info("Ping from node " + InetAddress.getLocalHost().getHostAddress() + " to node http://" + adress + " was successful. Time: " + pingTime + " ms.");
+		return "Ping from node " + InetAddress.getLocalHost().getHostAddress() + " to node http://" + adress + " was successful. Time: " + pingTime + " ms.";
 	}
 	
 	/**
@@ -41,7 +42,7 @@ public class PingRequestor {
 		log.info("Request: GET http://" + consulURL + "/v1/catalog/service/dbnode");
 		String allNodes = new RESTRequestor("GET", "http://" + consulURL + "/v1/catalog/service/dbnode").request();
 		log.info("Response: " + allNodes);
-		
+	
 		JSONArray jsonArray = new JSONArray(allNodes);
 		JSONObject jsonObj;
 		String pingResponse = "";
@@ -55,6 +56,33 @@ public class PingRequestor {
 			} catch(Exception e) {
 				pingResponse += "Cannot ping node " + jsonObj.getString("ServiceAddress") + ":" + ((int)jsonObj.get("ServicePort"));
 			}
+		}
+		
+		return pingResponse;
+	}
+	
+	/**
+	 * Ping all healthy database nodes
+	 * 
+	 * @return ping message
+	 * @throws Exception
+	 */
+	public String pingHealthyNodes(String consulURL) throws Exception {
+		
+		String pingResponse = "";
+		
+		for(String s : HealthCheckParser.getHealthy(consulURL)) {
+			
+			try {
+				pingResponse += ping("http://" + s, "/ping") + "\n";
+			} catch(Exception e) {
+				pingResponse += "Cannot ping node " + s;
+			}
+		}
+		
+		if("".equals(pingResponse)) {
+			
+			pingResponse = "Cannot found any other healthy nodes.\n";
 		}
 		
 		return pingResponse;
