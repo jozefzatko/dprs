@@ -16,6 +16,7 @@
 * **Docker:** https://www.docker.com/
 * **Docker Swarm:** https://docs.docker.com/swarm/networking/
 * **Nginx:** http://nginx.org/
+* **Registrator:** https://hub.docker.com/r/kidibox/registrator/
 * **Consul:** https://www.consul.io/
 * **Consul Template:** https://github.com/hashicorp/consul-template/
 * **Spark:** http://sparkjava.com/
