@@ -1,5 +1,10 @@
 package sk.fiit.dprs.dbnode.healthcheck.models;
 
+/**
+ * Model of HealthNode/Check of Consul /v1/health/service/dbnode response
+ * 
+ * @author Jozef Zatko
+ */
 public class Check {
 
 	private String checkId;

@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 import sk.fiit.dprs.dbnode.api.NodeAPIController;
 import sk.fiit.dprs.dbnode.api.UserAPIController;
-import sk.fiit.dprs.dbnode.healthcheck.HealthCheck;
+import sk.fiit.dprs.dbnode.healthcheck.HeartBeat;
 
 /**
  * Application entry point
@@ -32,8 +32,8 @@ public class Main {
 			new NodeAPIController(id, args[0]);
 			new UserAPIController(id, args[0]);
 		
-			HealthCheck healthCheck = new HealthCheck(args[0]);
-			new Thread(healthCheck).start();
+			HeartBeat heartBeat = new HeartBeat(args[0]);
+			new Thread(heartBeat).start();
 			
 		} catch(Exception e) {
 			e.printStackTrace();

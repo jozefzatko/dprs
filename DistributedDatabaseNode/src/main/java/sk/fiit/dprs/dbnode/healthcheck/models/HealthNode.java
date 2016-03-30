@@ -2,6 +2,11 @@ package sk.fiit.dprs.dbnode.healthcheck.models;
 
 import java.util.ArrayList;
 
+/**
+ * Model of HealthNode of Consul /v1/health/service/dbnode response
+ * 
+ * @author Jozef Zatko
+ */
 public class HealthNode {
 
 	private String node;
