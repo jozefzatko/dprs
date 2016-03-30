@@ -1,0 +1,157 @@
+#!/bin/bash
+
+docker-machine create -d virtualbox mh-keystore
+
+eval "$(docker-machine env mh-keystore)"
+
+docker run -d -p 8400:8400 -p 8500:8500 -p 8600:53/udp -h consul --name consul --env="constraint:node==mh-keystore" progrium/consul -server -bootstrap
+
+docker-machine create -d virtualbox --swarm --swarm-master --swarm-discovery="consul://192.168.99.100:8500" --engine-opt="cluster-store=consul://192.168.99.100:8500" --engine-opt="cluster-advertise=eth1:2376" VMswarmmaster
+
+eval $(docker-machine env --swarm VMswarmmaster)
+
+# network
+docker network create --driver overlay --subnet=10.0.9.0/24 my-net
+
+# Registrator + service
+docker-machine create -d virtualbox --swarm --swarm-discovery="consul://192.168.99.100:8500" --engine-opt="cluster-store=consul://192.168.99.100:8500" --engine-opt="cluster-advertise=eth1:2376" VMregistrator
+
+eval $(docker-machine env VMregistrator)
+
+docker run -d -v /var/run/docker.sock:/tmp/docker.sock --name registratorContainer --net=my-net --env="constraint:node==VMregistrator" kidibox/registrator:latest -internal consul://192.168.99.100:8500 
+
+docker run -itd -P --name=dbnode1 --net=my-net -e "SERVICE_CHECK_TTL=30s" --env="constraint:node==VMregistrator" jozefzatko/dbnode '192.168.99.100:8500'
+
+# NGINX
+docker-machine create -d virtualbox --swarm --swarm-discovery="consul://192.168.99.100:8500" --engine-opt="cluster-store=consul://192.168.99.100:8500" --engine-opt="cluster-advertise=eth1:2376" VMnginx
+ 
+eval $(docker-machine env VMnginx)
+ 
+# TREBA ESTE VYTVORIT /TMP/SERVICE.CTMPL
+
+docker-machine ssh VMnginx
+tce-load -wi nano
+cd /tmp
+nano service.ctmpl
+
+upstream dbnode {
+  least_conn;
+  {{range service "dbnode"}}server {{.Address}}:{{.Port}} max_fails=3 fail_timeout=3 weight=1;
+  {{else}}server 127.0.0.1:65535;{{end}}
+}
+
+server {
+  listen 80 default_server;
+
+  charset utf-8;
+
+  location / {
+    proxy_pass http://dbnode;
+  }
+}
+
+# treba upravit IP consulu
+docker run -p 8080:80 -d -e "CONSUL_URL=192.168.99.100:8500" --name nginx --net=my-net --env="constraint:node==VMnginx" --volume /tmp/service.ctmpl:/templates/service.ctmpl dvalocky/nginx-consul_template:latest
+
+
+# ELK
+
+docker-machine create -d virtualbox --swarm --swarm-discovery="consul://192.168.99.100:8500" --engine-opt="cluster-store=consul://192.168.99.100:8500" --engine-opt="cluster-advertise=eth1:2376" ELK
+
+eval $(docker-machine env ELK)
+
+docker run -d -p 5601:5601 -p 9200:9200 -p 5044:5044 -p 5000:5000 -it --name elk --net=my-net --env="constraint:node==ELK" sebp/elk
+
+# pridat do nginx configu zapisovanie logov do suboru 
+
+eval $(docker-machine env VMnginx)
+
+nano /tmp/services.ctmpl
+
+upstream dbnode {
+  least_conn;
+  {{range service "dbnode"}}server {{.Address}}:{{.Port}} max_fails=3 fail_time$
+  {{else}}server 127.0.0.1:65535;{{end}}
+}
+
+server {
+  listen 80 default_server;
+
+  error_log /var/log/nginx/error.log warn;
+  access_log /var/log/nginx/nginx-access.log;
+  charset utf-8;
+
+  location / {
+    proxy_pass http://dbnode;
+  }
+}
+
+# ak sme predchadzaujic krok urobili az teraz tak musime vyp a zap nginx
+
+# musime nainstalovat Filebeat https://www.elastic.co/downloads/beats/filebeat
+
+docker exec -it nginx /bin/bash
+
+cd /tmp
+
+apt-get update
+apt-get install wget
+apt-get install nano
+apt-get install curl
+apt-get install sudo
+
+# teraz zadame nasledujuci prikaz aby sme presili chybe: Error opening terminal: unknown.
+
+export TERM=xterm
+
+cd /tmp
+wget https://download.elastic.co/beats/filebeat/filebeat-1.1.2-x86_64.tar.gz
+tar -xvzf filebeat-1.1.2-x86_64.tar.gz
+
+# Before starting Filebeat for the first time, run this command needs ELK IP
+
+curl -XPUT 'http://192.168.99.104:9200/_template/filebeat?pretty' -d@/tmp/filebeat-1.1.2-x86_64/filebeat.template.json
+cd /tmp/filebeat-1.1.2-x86_64
+nano filebeat.yml
+
+output:
+  logstash:
+    enabled: true
+    hosts:
+      - 192.168.99.104:5044
+    timeout: 15
+
+filebeat:
+  prospectors:
+ 
+    -
+      paths:
+	- "/var/log/nginx/error.log"
+        - "/var/log/nginx/nginx-access.log"
+      document_type: nginx-access
+
+# musime na kontajnery s ELK vymazat certificat 
+
+docker-machine ssh ELK
+docker exec -it elk /bin/bash
+cd /etc/logstash/conf.d
+apt-get update
+apt-get install nano
+nano 02-beats-input.conf
+
+input {
+  beats {
+    port => 5044
+    ssl => false
+
+  }
+}
+
+# spustime filebeat
+sudo ./filebeat -c filebeat.yml -e
+sudo ./filebeat filebeat.yml -v -e
+
+# teraz musime nakonfiguravat kibana
+
+# nastavime index na filebeat-*
+
