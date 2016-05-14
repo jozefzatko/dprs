@@ -1,18 +1,19 @@
 package sk.fiit.dprs.dbnode.bootstraping;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import com.google.gson.Gson;
 
 import sk.fiit.dprs.dbnode.api.services.RESTRequestor;
-import sk.fiit.dprs.dbnode.bootstraping.models.CatalogEntry;
-import sk.fiit.dprs.dbnode.bootstraping.models.Node;
-import sk.fiit.dprs.dbnode.bootstraping.models.Service;
+import sk.fiit.dprs.dbnode.bootstraping.models.AgentEntry;
+import sk.fiit.dprs.dbnode.bootstraping.models.Check;
 
 /**
  * Register this node in Consul service discovery
  * 
- * @author Jozef
+ * @author Jozef Zatko
  *
  */
 public class Registrator {
@@ -29,17 +30,22 @@ public class Registrator {
 	 */
 	public void register(String id) {
 		
-		String registerAddress = "http://" + this.consulIp + "/v1/catalog/register";
+		String registerAddress = "http://" + this.consulIp + "/v1/agent/service/register";
+		String myIP = "";
+		try {
+			myIP = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 		
-		Node node = new Node(this.consulIp.split(":")[0]);
-		Service service = new Service(id);
-		
-		String entry = new Gson().toJson(new CatalogEntry(node, service));
+		Check check = new Check();
+		String entry = new Gson().toJson(new AgentEntry(myIP, check));
 		
 		try {
-			new RESTRequestor("POST", registerAddress, entry).request();
+			new RESTRequestor("PUT", registerAddress, entry).request();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
 }

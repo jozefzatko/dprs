@@ -50,7 +50,7 @@ public class RESTRequestor {
 			
 		logger.info("REST: " + this.requestMethod + " " + this.requestUrl + " " + this.params);
 		
-		if ("POST".equals(this.requestMethod)) {
+		if ("PUT".equals(this.requestMethod)) {
 			conn.setDoOutput(true);
 			DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
 			wr.writeBytes(this.params);
@@ -59,6 +59,7 @@ public class RESTRequestor {
 		}
 		
 		if (conn.getResponseCode() != 200) {
+			logger.error(conn.getResponseMessage());
 			throw new RuntimeException("Cannot initialize connection to " + this.requestUrl + " : " + conn.getResponseCode());
 		}
 			
