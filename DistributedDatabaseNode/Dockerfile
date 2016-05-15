@@ -8,6 +8,27 @@ RUN apt-get install -y maven
 
 WORKDIR /workdir
 
+# Add fileabeat for logs
+
+ADD start.sh /usr/bin/start.sh
+RUN chmod +x /usr/bin/start.sh
+
+RUN apt-get install -y wget
+RUN apt-get install -y curl
+RUN apt-get install -y sudo
+
+ADD filebeat /usr/bin/filebeat
+ADD filebeat.template.json /usr/bin/filebeat.template.json
+ADD filebeat.yml /usr/bin/filebeat.yml
+
+RUN chmod +x /usr/bin/filebeat
+RUN chmod +x /usr/bin/filebeat.template.json
+RUN chmod +x /usr/bin/filebeat.yml
+
+RUN wget http://stedolan.github.io/jq/download/linux64/jq
+RUN chmod +x ./jq
+RUN sudo cp jq /usr/bin 
+
 # Prepare by downloading dependencies
 ADD pom.xml /workdir/pom.xml
 RUN ["mvn", "dependency:resolve"]
@@ -19,4 +40,4 @@ RUN ["mvn", "package"]
 
 # Run application on port 4567
 EXPOSE 4567
-ENTRYPOINT ["/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "/workdir/target/dbnode-jar-with-dependencies.jar"]
+ENTRYPOINT ["/usr/bin/start.sh","/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "/workdir/target/dbnode-jar-with-dependencies.jar"]

@@ -1,0 +1,14 @@
+output:
+  logstash:
+    enabled: true
+    hosts:
+      - elk:5044
+    timeout: 15
+
+filebeat:
+  prospectors:
+
+    -
+      paths:
+         - "/workdir/log4j.log"
+      document_type: dbnode-access
