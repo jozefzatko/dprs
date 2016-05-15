@@ -71,7 +71,7 @@ public class PingRequestor {
 		
 		String pingResponse = "";
 		
-		for(String s : HealthCheckParser.getHealthy(consulURL)) {
+		for(String s : HealthCheckParser.getHealthyNodes(consulURL)) {
 			
 			try {
 				pingResponse += ping("http://" + s, "/ping") + "\n";
