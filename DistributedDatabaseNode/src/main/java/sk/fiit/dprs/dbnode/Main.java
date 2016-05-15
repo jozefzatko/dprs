@@ -10,9 +10,9 @@ import org.apache.log4j.Logger;
 
 import sk.fiit.dprs.dbnode.api.NodeAPIController;
 import sk.fiit.dprs.dbnode.api.UserAPIController;
-import sk.fiit.dprs.dbnode.bootstraping.Registrator;
+import sk.fiit.dprs.dbnode.bootstraping.NodeInicializer;
+import sk.fiit.dprs.dbnode.bootstraping.NodeRegistrator;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
-import sk.fiit.dprs.dbnode.consulkv.NodesTable;
 import sk.fiit.dprs.dbnode.healthcheck.HeartBeat;
 
 /**
@@ -41,14 +41,17 @@ public class Main {
 		try {
 			logger.info("Starting dbnode on port 4567 with CONSUL_URL " + args[0]);
 			
-			new Registrator(args[0]).register(id);
+			String consulIpPort = args[0];
 			
-			new NodeAPIController(id, args[0]);
-			new UserAPIController(id, args[0]);
-
-			//NodeTableService service = new NodeTableService(args[0]);
+			NodeTableService service = new NodeTableService(consulIpPort);
 			
-			HeartBeat heartBeat = new HeartBeat(args[0]);
+			new NodeInicializer(service, id, consulIpPort).init();
+			new NodeRegistrator(consulIpPort).register();
+			
+			new NodeAPIController(id, consulIpPort);
+			new UserAPIController(id, consulIpPort);
+			
+			HeartBeat heartBeat = new HeartBeat(consulIpPort);
 			new Thread(heartBeat).start();
 			
 		} catch(Exception e) {

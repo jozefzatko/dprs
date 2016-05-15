@@ -15,13 +15,13 @@ public class HeartBeat implements Runnable {
 
 	static Logger log = Logger.getLogger(HeartBeat.class.getName());
 	
-	private String consulIp;
+	private String consulIpPort;
 	private String checkId;
 	private RESTRequestor healthRequest;
 	
-	public HeartBeat(String consulIp) {
+	public HeartBeat(String consulIpPort) {
 		
-		this.consulIp = consulIp;
+		this.consulIpPort = consulIpPort;
 	}
 	
 	public void run() {
@@ -32,11 +32,11 @@ public class HeartBeat implements Runnable {
 			e.printStackTrace();
 		}
 		
-		this.checkId = HealthCheckParser.getCheckId(this.consulIp);
+		this.checkId = HealthCheckParser.getCheckId(this.consulIpPort);
 		log.info("Found out CheckID: " + this.checkId);
 		
-		log.info("GET http://" + this.consulIp + "/v1/agent/check/pass/" + this.checkId);
-		this.healthRequest = new RESTRequestor("GET", "http://" + this.consulIp + "/v1/agent/check/pass/" + this.checkId);
+		log.info("GET http://" + this.consulIpPort + "/v1/agent/check/pass/" + this.checkId);
+		this.healthRequest = new RESTRequestor("GET", "http://" + this.consulIpPort + "/v1/agent/check/pass/" + this.checkId);
 		
 		while(true) {
 			

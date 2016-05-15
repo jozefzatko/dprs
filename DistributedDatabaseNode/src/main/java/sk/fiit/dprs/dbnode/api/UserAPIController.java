@@ -15,7 +15,7 @@ public class UserAPIController {
 
 	static Logger log = Logger.getLogger(UserAPIController.class.getName());
 	
-	public UserAPIController(String id, String consulURL) {
+	public UserAPIController(String id, String consulIpPort) {
 
 		/*
 		 * READ from DB
@@ -74,7 +74,7 @@ public class UserAPIController {
 		get("/pingall", (request, response) -> {
 			
 			log.info(request.requestMethod() + " " + request.url());
-			return UserAPIRequestProcessing.pingAllNodes(consulURL);
+			return UserAPIRequestProcessing.pingAllNodes(consulIpPort);
 		});
 		
 		/*
@@ -85,7 +85,7 @@ public class UserAPIController {
 		get("/pinghealthy", (request, response) -> {
 			
 			log.info(request.requestMethod() + " " + request.url());
-			return UserAPIRequestProcessing.pingHealthyNodes(consulURL);
+			return UserAPIRequestProcessing.pingHealthyNodes(consulIpPort);
 		});
 		
 		/*

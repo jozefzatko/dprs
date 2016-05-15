@@ -85,6 +85,32 @@ public class DataNode {
 		}
 	}
 	
+	/**
+	 * Select part of data from hash interval
+	 */
+	public String toString(long from, long to) {
+		
+		String strHashTable = this.data.toString().substring(1, this.data.toString().length()-1);
+		String arrHashTable[] = strHashTable.split(", ");
+		
+		StringBuilder builder = new StringBuilder();
+	    
+		for (int i=0; i<arrHashTable.length; i++) {
+			
+			long key = new Long(arrHashTable[i].split("=")[0]);
+			String value = arrHashTable[i].split("=")[1];
+			
+			if (key >= from && key<=to) {
+				
+				
+			}
+			//TODO: dokoncit
+		}
+
+	    return builder.toString();
+		
+	}
+	
 	public HashMap<String, DatabaseRecord> getData() {
 		return data;
 	}

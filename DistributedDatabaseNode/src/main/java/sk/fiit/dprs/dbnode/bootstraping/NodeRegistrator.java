@@ -16,21 +16,21 @@ import sk.fiit.dprs.dbnode.bootstraping.models.Check;
  * @author Jozef Zatko
  *
  */
-public class Registrator {
+public class NodeRegistrator {
 
-	private String consulIp;
+	private String consulIpPort;
 	
-	public Registrator(String consulIp) {
+	public NodeRegistrator(String consulIpPort) {
 		
-		this.consulIp = consulIp;
+		this.consulIpPort = consulIpPort;
 	}
 	
 	/**
 	 * Register this node in Consul via REST /v1/catalog/register request
 	 */
-	public void register(String id) {
+	public void register() {
 		
-		String registerAddress = "http://" + this.consulIp + "/v1/agent/service/register";
+		String registerAddress = "http://" + this.consulIpPort + "/v1/agent/service/register";
 		String myIP = "";
 		try {
 			myIP = InetAddress.getLocalHost().getHostAddress();
