@@ -19,6 +19,7 @@ public class UserAPIController {
 	
 	public UserAPIController(String id, String consulIpPort) {
 
+		String logMessage ="[ ]";
 		/* 
 		 * READ from DB
 		 * 
@@ -27,7 +28,8 @@ public class UserAPIController {
 		 */
 		get("/data/:key", (request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return UserAPIRequestProcessing.get(request.params(":key"), request.queryParams("quorum"));
 		});
 
@@ -39,7 +41,8 @@ public class UserAPIController {
 		 */
 		post("/data/:key/:value", (request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return UserAPIRequestProcessing.createOrUpdate(request.params(":key"), request.params(":value"),
 						request.queryParams("quorum"), request.queryParams("vclock"));
 		});
@@ -52,7 +55,8 @@ public class UserAPIController {
 		 */
 		delete("/data/:key", (request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return UserAPIRequestProcessing.delete(request.params(":key"),request.queryParams("quorum"),
 						request.queryParams("vclock"));
 		});
@@ -64,7 +68,8 @@ public class UserAPIController {
 		 */
 		get("/ping/:adress", (request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return UserAPIRequestProcessing.pingNode(request.params(":adress"));
 		});
 		
@@ -75,7 +80,8 @@ public class UserAPIController {
 		 */
 		get("/pingall", (request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return UserAPIRequestProcessing.pingAllNodes(consulIpPort);
 		});
 		
@@ -86,7 +92,8 @@ public class UserAPIController {
 		 */
 		get("/pinghealthy", (request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return UserAPIRequestProcessing.pingHealthyNodes(consulIpPort);
 		});
 		
@@ -97,7 +104,8 @@ public class UserAPIController {
 		 */
 		get("/ping", (request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return "Status: OK\n" + new Date().toString();
 		});
 		
@@ -108,14 +116,8 @@ public class UserAPIController {
 		 */
 		get("/info", (request, response) -> {
 			
-			Set<String> requestHeaders = request.headers();
-			Iterator iter =requestHeaders.iterator();
-			String finalReq = "";
-			while(iter.hasNext()){
-				String header = (String)iter.next();
-				finalReq = finalReq+" "+header;
-			}
-			log.info("REQ HEADERS: "+finalReq+" method: "+request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return UserAPIRequestProcessing.getNodeInfo(id);
 		});
 		
@@ -124,7 +126,8 @@ public class UserAPIController {
 		 */
 		exception(Exception.class, (e, request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			
 			response.status(400);
 			response.body(e.toString());
