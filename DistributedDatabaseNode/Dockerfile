@@ -42,4 +42,6 @@ RUN ["mvn", "package"]
 
 # Run application on port 4567
 EXPOSE 4567
-ENTRYPOINT ["/usr/bin/start.sh","/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "/workdir/target/dbnode-jar-with-dependencies.jar"]
+ENTRYPOINT ["/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "/workdir/target/dbnode-jar-with-dependencies.jar"]
+
+
