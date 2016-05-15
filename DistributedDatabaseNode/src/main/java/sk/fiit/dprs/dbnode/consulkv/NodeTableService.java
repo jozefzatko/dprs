@@ -81,11 +81,17 @@ public class NodeTableService {
 			
 			if (id.equals(i.getId())) {
 				
-				hashValue = i.getHashFrom() - 1;
+				hashValue = i.getHashFrom();
 				break;
 			}
 		}
 		
+		if (hashValue == 0) {
+			hashValue = 4294967295L;
+		} else {
+			hashValue -= 1;
+		}
+				
 		for(NodeTableRecord i : table.getTable()) {
 			
 			if (hashValue == i.getHashTo()) {
