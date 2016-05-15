@@ -10,6 +10,8 @@ WORKDIR /workdir
 
 # Add fileabeat for logs
 
+ENV CONSUL_URL 192.168.99.100:8500
+
 ADD start.sh /usr/bin/start.sh
 RUN chmod +x /usr/bin/start.sh
 
