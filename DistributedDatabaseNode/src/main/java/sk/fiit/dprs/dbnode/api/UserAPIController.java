@@ -3,6 +3,8 @@ package sk.fiit.dprs.dbnode.api;
 import static spark.Spark.*;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -17,7 +19,7 @@ public class UserAPIController {
 	
 	public UserAPIController(String id, String consulIpPort) {
 
-		/*
+		/* 
 		 * READ from DB
 		 * 
 		 * GET http://localhost:4567/data/key123
@@ -29,7 +31,7 @@ public class UserAPIController {
 			return UserAPIRequestProcessing.get(request.params(":key"), request.queryParams("quorum"));
 		});
 
-		/*
+		/* 
 		 * CREATE or UPDATE
 		 * 
 		 * POST http://localhost:4567/data/key123/value123
@@ -106,7 +108,14 @@ public class UserAPIController {
 		 */
 		get("/info", (request, response) -> {
 			
-			log.info(request.requestMethod() + " " + request.url());
+			Set<String> requestHeaders = request.headers();
+			Iterator iter =requestHeaders.iterator();
+			String finalReq = "";
+			while(iter.hasNext()){
+				String header = (String)iter.next();
+				finalReq = finalReq+" "+header;
+			}
+			log.info("REQ HEADERS: "+finalReq+" method: "+request.requestMethod() + " " + request.url());
 			return UserAPIRequestProcessing.getNodeInfo(id);
 		});
 		
