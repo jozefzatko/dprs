@@ -10,11 +10,11 @@ import java.util.HashMap;
  */
 public class DataNode {
 
-	private HashMap<String, DatabaseRecord> data;
+	private HashMap<Long, DatabaseRecord> data;
 	
 	public DataNode() {
 		
-		this.data = new HashMap<String, DatabaseRecord>();
+		this.data = new HashMap<Long, DatabaseRecord>();
 	}
 	
 	/*
@@ -32,7 +32,7 @@ public class DataNode {
 	/*
 	 * CREATE
 	 */
-	public void create(String key, String value, String vClockDefinition) {
+	public void create(Long key, String value, String vClockDefinition) {
 		
 		DatabaseRecord record = new DatabaseRecord(value, vClockDefinition);
 		
@@ -42,7 +42,7 @@ public class DataNode {
 	/*
 	 * UPDATE
 	 */
-	public void update(String key, String value, String vClockDefinition) {
+	public void update(Long key, String value, String vClockDefinition) {
 		
 		DatabaseRecord record = data.get(key);
 		
@@ -55,7 +55,7 @@ public class DataNode {
 	/*
 	 * DELETE
 	 */
-	public void delete(String key) {
+	public void delete(Long key) {
 		
 		if(data.containsKey(key)) {
 			
@@ -69,13 +69,18 @@ public class DataNode {
 	 */
 	public void seed(String newData) {
 		
+		if("".equals(newData)) {
+			
+			return;
+		}
+		
 		newData = newData.substring(1, newData.length()-1);
 		
 		String[] newDatArr = newData.split(", ");
 		
 		for (int i=0; i<newDatArr.length; i++) {
 			
-			String key = newDatArr[i].split("=")[0];
+			Long key = new Long(newDatArr[i].split("=")[0]);
 			String value = newDatArr[i].split("=")[1];
 			
 			String data = value.split(";")[0];
@@ -90,28 +95,39 @@ public class DataNode {
 	 */
 	public String toString(long from, long to) {
 		
+		if(this.data.isEmpty()) {
+			
+			return "";
+		}
+		
 		String strHashTable = this.data.toString().substring(1, this.data.toString().length()-1);
 		String arrHashTable[] = strHashTable.split(", ");
 		
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder("");
 	    
 		for (int i=0; i<arrHashTable.length; i++) {
 			
 			long key = new Long(arrHashTable[i].split("=")[0]);
-			String value = arrHashTable[i].split("=")[1];
 			
 			if (key >= from && key<=to) {
 				
-				
+				builder.append(arrHashTable[i] + ", ");
 			}
-			//TODO: dokoncit
 		}
-
-	    return builder.toString();
 		
+		String result = builder.toString();
+		
+		if ("".equals(result)) {
+			
+			return result;
+		}
+		
+		result = result.substring(0, builder.length()-2);
+		
+		return "{" + result + "}";
 	}
 	
-	public HashMap<String, DatabaseRecord> getData() {
+	public HashMap<Long, DatabaseRecord> getData() {
 		return data;
 	}
 }
