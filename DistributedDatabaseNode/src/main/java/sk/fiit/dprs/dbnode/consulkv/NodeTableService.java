@@ -56,15 +56,58 @@ public class NodeTableService {
 	}
 	
 	/**
+	 * Return id of previous node in order
+	 * 
+	 * @param id node identifier
+	 * @return identifier of previous node
+	 */
+	public String getPrevious(String id) {
+		
+		try {
+			this.table.loadNodeTable();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			this.table.loadNodeTable();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		long hashValue = -1L;
+		
+		for(NodeTableRecord i : table.getTable()) {
+			
+			if (id.equals(i.getId())) {
+				
+				hashValue = i.getHashFrom() - 1;
+				break;
+			}
+		}
+		
+		for(NodeTableRecord i : table.getTable()) {
+			
+			if (hashValue == i.getHashTo()) {
+				
+				return i.getId();
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Update Node Table Record
 	 * 
 	 * @param id node id - ipAdress
 	 * @param from hash from
 	 * @param to hash to
-	 * @param firstReplica ip of first replica
-	 * @param secondReplica ip of second replica
+	 * @param firstReplica IP of first replica
+	 * @param secondReplica IP of second replica
+	 * @param status status of node
 	 */
-	public void updateNode(String id, long from, long to, String firstReplica, String secondReplica) {
+	public void updateNode(String id, Long from, Long to, String firstReplica, String secondReplica, String status) {
 		
 		try {
 			this.table.loadNodeTable();
@@ -76,10 +119,21 @@ public class NodeTableService {
 			
 			if (id.equals(i.getId())) {
 				
-				i.setHashFrom(from);
-				i.setHashTo(to);
-				i.setFirstReplicaId(firstReplica);
-				i.setSecondReplicaId(secondReplica);
+				if (from != null) {
+					i.setHashFrom(from);
+				}
+				if (to != null) {
+					i.setHashTo(to);
+				}
+				if (firstReplica != null) {
+					i.setFirstReplicaId(firstReplica);
+				}
+				if (secondReplica != null) {
+					i.setSecondReplicaId(secondReplica);
+				}
+				if (status != null) {
+					i.setStatus(status);
+				}
 				
 				break;
 			}
@@ -99,7 +153,7 @@ public class NodeTableService {
 	 */
 	public void addFirstNode(String ip) {
 		
-		NodeTableRecord record = new NodeTableRecord(ip, 0, 4294967295L, "", "");
+		NodeTableRecord record = new NodeTableRecord(ip, 0L, 1431655763L, "", "");
 		this.table.getTable().add(record);
 				
 		try {
@@ -116,12 +170,25 @@ public class NodeTableService {
 	 */
 	public void addSecondNode(String ip) {
 		
-		NodeTableRecord record = new NodeTableRecord(ip, 2147483648L, 4294967295L, "", "");
+		NodeTableRecord record = new NodeTableRecord(ip, 1431655764L, 2863311529L, "", "");
 		this.table.getTable().add(record);
 		
-		String first = findNodeByHash(0L);
+		try {
+			this.table.writeNodeTable();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Write record if node is the third one
+	 * 
+	 * @param ip IP address of new node
+	 */
+	public void addThirdNode(String ip) {
 		
-		updateNode(first, 0, 2147483647L, "", "");
+		NodeTableRecord record = new NodeTableRecord(ip, 2863311530L, 4294967295L, "", "");
+		this.table.getTable().add(record);
 		
 		try {
 			this.table.writeNodeTable();

@@ -45,7 +45,7 @@ public class Main {
 			
 			NodeTableService service = new NodeTableService(consulIpPort);
 			
-			new NodeInicializer(service, id, consulIpPort).init();
+			new NodeInicializer(service).init();
 			new NodeRegistrator(consulIpPort).register();
 			
 			new NodeAPIController(id, consulIpPort);

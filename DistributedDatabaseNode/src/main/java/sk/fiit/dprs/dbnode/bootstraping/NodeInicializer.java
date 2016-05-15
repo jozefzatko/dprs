@@ -13,17 +13,11 @@ import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 public class NodeInicializer {
 
 	private NodeTableService service;
-	private String id;
-	private String consulIpPort;
-	
 	private String myIp;
 	
-	public NodeInicializer(NodeTableService service, String id, String consulIpPort) throws UnknownHostException {
+	public NodeInicializer(NodeTableService service) throws UnknownHostException {
 		
 		this.service = service;
-		this.id = id;
-		this.consulIpPort = consulIpPort;
-		
 		this.myIp = InetAddress.getLocalHost().getHostAddress();
 	}
 	
@@ -36,36 +30,39 @@ public class NodeInicializer {
 		
 		switch (service.getCountofNodes()) {
 		
-			case 1:  service.addFirstNode(myIp);
+			case 0: service.addFirstNode(myIp);
 			break;
 			
-			case 2:  initAsSecondNode();
+			case 1: service.addSecondNode(myIp);
 			break;
 			
-			case 3:  initAsThirdNode();
+			case 2: initAsThirdNode();
 			break;
 			
-			default:  initAsCasualNode();
+			default: initAsCasualNode();
 			break;
 		}
 	}
 	
-	
-	private void initAsSecondNode() {
-		
-		service.addSecondNode(myIp);
-		
-		// TODO: presunutie polovice dat z 1 na 2
-	}
-	
+	/**
+	 * Write table record after third node is added
+	 */
 	private void initAsThirdNode() {
 		
-		// TODO: pridanie 3. uzla
-		// TODO: uprava 1. a 2. uzla
-		// TODO: replikacia dat
-		// TODO: nastavenie stavu na ok
+		service.addThirdNode(myIp);
+		
+		String third = myIp;
+		String second = service.getPrevious(third);
+		String first = service.getPrevious(second);
+		
+		service.updateNode(first,  null, null, second, third,  "ok");
+		service.updateNode(second, null, null, third,  first,  "ok");
+		service.updateNode(third,  null, null, first,  second, "ok");
 	}
 	
+	/**
+	 * Write table record after node is added
+	 */
 	private void initAsCasualNode() {
 		
 		// TODO: magic
