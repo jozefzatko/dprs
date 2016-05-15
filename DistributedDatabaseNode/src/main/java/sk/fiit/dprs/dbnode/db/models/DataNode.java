@@ -127,6 +127,32 @@ public class DataNode {
 		return "{" + result + "}";
 	}
 	
+	/**
+	 * Remove values from node according to hash
+	 * 
+	 * @param from hash range from
+	 * @param to hash range to
+	 */
+	public void remove(long from, long to) {
+		
+		if(this.data.isEmpty()) {
+			return;
+		}
+		
+		String strHashTable = this.data.toString().substring(1, this.data.toString().length()-1);
+		String arrHashTable[] = strHashTable.split(", ");
+	    
+		for (int i=0; i<arrHashTable.length; i++) {
+			
+			long key = new Long(arrHashTable[i].split("=")[0]);
+			
+			if (key >= from && key<=to) {
+				
+				this.data.remove(key);
+			}
+		}
+	}
+	
 	public HashMap<Long, DatabaseRecord> getData() {
 		return data;
 	}
