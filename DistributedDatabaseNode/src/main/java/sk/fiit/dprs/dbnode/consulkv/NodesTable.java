@@ -1,5 +1,6 @@
 package sk.fiit.dprs.dbnode.consulkv;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -77,6 +78,25 @@ public class NodesTable {
 
 	public ArrayList<NodeTableRecord> getTable() {
 		return table;
+	}
+	
+	/**
+	 * Initialize table in Consul key/value if does not exist
+	 */
+	public void initIfNeeded() {
+		
+		try {
+			loadNodeTable();
+		} catch (Exception e) {
+			
+			String emptyRecord = new GsonBuilder().create().toJson(new ArrayList<NodeTableRecord>());
+			
+			try {
+				new RESTRequestor("PUT", "http://" + consulURL + "/v1/kv/nodetable", emptyRecord).request();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
 	}
 	
 }

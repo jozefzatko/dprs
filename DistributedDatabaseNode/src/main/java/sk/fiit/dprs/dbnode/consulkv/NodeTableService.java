@@ -129,4 +129,12 @@ public class NodeTableService {
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Initialize table in Consul if needed
+	 */
+	public void initIfNeeded() {
+		this.table.initIfNeeded();
+	}
+
 }

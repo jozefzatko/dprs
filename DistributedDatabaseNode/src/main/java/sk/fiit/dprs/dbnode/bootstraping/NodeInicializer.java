@@ -32,6 +32,8 @@ public class NodeInicializer {
 	 */
 	public void init() {
 		
+		service.initIfNeeded();
+		
 		switch (service.getCountofNodes()) {
 		
 			case 1:  service.addFirstNode(myIp);
