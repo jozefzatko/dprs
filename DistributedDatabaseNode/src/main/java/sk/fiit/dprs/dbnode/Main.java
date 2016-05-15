@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import sk.fiit.dprs.consulkv.NodesTable;
 import sk.fiit.dprs.dbnode.api.NodeAPIController;
 import sk.fiit.dprs.dbnode.api.UserAPIController;
 import sk.fiit.dprs.dbnode.bootstraping.Registrator;
@@ -43,7 +44,7 @@ public class Main {
 			
 			new NodeAPIController(id, args[0]);
 			new UserAPIController(id, args[0]);
-			
+			new NodesTable(args[0]);
 			HeartBeat heartBeat = new HeartBeat(args[0]);
 			new Thread(heartBeat).start();
 			
