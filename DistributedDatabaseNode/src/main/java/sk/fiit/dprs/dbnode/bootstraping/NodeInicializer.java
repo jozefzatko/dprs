@@ -13,12 +13,15 @@ import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 public class NodeInicializer {
 
 	private NodeTableService service;
-	private String myIp;
 	
-	public NodeInicializer(NodeTableService service) throws UnknownHostException {
+	private String myIp;
+	private String supportedNodeIp;
+	
+	public NodeInicializer(NodeTableService service, String supportedNodeIp) throws UnknownHostException {
 		
 		this.service = service;
 		this.myIp = InetAddress.getLocalHost().getHostAddress();
+		this.supportedNodeIp = supportedNodeIp;
 	}
 	
 	/**
@@ -64,6 +67,10 @@ public class NodeInicializer {
 	 * Write table record after node is added
 	 */
 	private void initAsCasualNode() {
+		
+		if (this.supportedNodeIp == null) {
+			
+		}
 		
 		// TODO: magic
 	}

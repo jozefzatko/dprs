@@ -42,10 +42,18 @@ public class Main {
 			logger.info("Starting dbnode on port 4567 with CONSUL_URL " + args[0]);
 			
 			String consulIpPort = args[0];
+			String supportedNode;
+			
+			if (args.length > 1) {
+				supportedNode = args[1];
+			} else {
+				supportedNode = null;
+			}
+			
 			
 			NodeTableService service = new NodeTableService(consulIpPort);
 			
-			new NodeInicializer(service).init();
+			new NodeInicializer(service, supportedNode).init();
 			new NodeRegistrator(consulIpPort).register();
 			
 			new NodeAPIController(id, consulIpPort);
