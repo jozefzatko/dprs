@@ -63,7 +63,29 @@ public class HealthCheckParser {
 		return "";
 	}
 	
-	public static ArrayList<String> getHealthy(String consulIp) {
+	/**
+	 * Get array of all healthy DB nodes
+	 *
+	 * @param consulIp IP address of Consul 
+	 * @return array
+	 */
+	public static ArrayList<String> getHealthyNodes(String consulIp) {
+		
+		return getAccordingToHealth(consulIp, "passing");
+	}
+	
+	/**
+	 * Get array of all dead DB nodes
+	 *
+	 * @param consulIp IP address of Consul 
+	 * @return array
+	 */
+	public static ArrayList<String> getDeadNodes(String consulIp) {
+		
+		return getAccordingToHealth(consulIp, "critical");
+	}
+	
+	private static ArrayList<String> getAccordingToHealth(String consulIp, String status) {
 		
 		try {
 			str = new RESTRequestor("GET", "http://" + consulIp + "/v1/health/service/dbnode").request();
@@ -83,8 +105,6 @@ public class HealthCheckParser {
 			e.printStackTrace();
 		}
 		
-		//ip = "10.0.9.8";
-		
 		for(HealthNode i : data) {
 			
 			if(i.getServiceAddress().equals(ip) == false) {
@@ -93,7 +113,7 @@ public class HealthCheckParser {
 				
 				for(Check j : checks) {
 					
-					if("passing".equals(j.getStatus()) && "dbnode".equals(j.getServiceName())) {
+					if(status.equals(j.getStatus()) && "dbnode".equals(j.getServiceName())) {
 						result.add((i.getServiceAddress() + ":" + i.getPort()));
 						break;
 					}
