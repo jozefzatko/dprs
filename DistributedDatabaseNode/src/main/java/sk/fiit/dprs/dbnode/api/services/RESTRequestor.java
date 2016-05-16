@@ -20,7 +20,7 @@ public class RESTRequestor {
 	
 	private String requestMethod;
 	private String requestUrl;
-	private String params;
+	private String params = "";
 	
 	public RESTRequestor(String requestMethod, String requestUrl) {
 		
@@ -57,9 +57,15 @@ public class RESTRequestor {
 				params = "";
 			}
 			
+			if(conn  == null){
+				logger.info("CONN JE NULL A RISO MAL PRAVDU");
+			}
 			logger.info("VBEHOL SOM DO IFU");
 			conn.setDoOutput(true);
 			DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+			if(wr  == null){
+				logger.info("WR JE NULL A RISO MAL PRAVDU");
+			}
 			logger.info("SOM V STREDE IFU");
 			wr.writeBytes(this.params);
 			wr.flush();
