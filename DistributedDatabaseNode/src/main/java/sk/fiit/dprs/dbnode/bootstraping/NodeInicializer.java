@@ -141,7 +141,8 @@ public class NodeInicializer {
 		
 		
 		String data;
-		
+		String secondHalf = "";
+		//uprava supportovaneho nodu
 		try {
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/3").request();
 			
@@ -149,7 +150,7 @@ public class NodeInicializer {
 			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/3", data).request();
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
 			
-			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
+			secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
 			logger.info("UKLADAM SI MOJE DATA:"+secondHalf);
 			Database.getinstance().getMyData().seed(secondHalf);
 			
@@ -164,25 +165,27 @@ public class NodeInicializer {
 		
 		service.updateNode(supportedNodeIp, from1, to1, null, null, null);
 		
-		
+		//uprava predchodcu supporta
 		String previousNodeIp = service.getPrevious(supportedNodeIp);
 		try {
 			new RESTRequestor("DELETE", "http://" + previousNodeIp + ":4567/dbnode/3").request();
-			//nasledujuci riadok je podozrivy
-			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();
+			//nasledujuci riadok je podozrivy - jozov kus kodu asi zbytocny
+			/*String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();
 			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/3", secondHalf).request();
-			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();
+			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();*/
+			if(!secondHalf.equals(""))
+			new RESTRequestor("POST", "http://" + previousNodeIp + ":4567/dbnode/3", secondHalf).request();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		service.updateNode(myIp, Database.getinstance().getMyDataHashFrom(), Database.getinstance().getMyDataHashTo(), supportedNodeIp, previousNodeIp, "ok");
+		//toto je uz asi zbytocne - odtialto nizsie
+		/*service.updateNode(myIp, Database.getinstance().getMyDataHashFrom(), Database.getinstance().getMyDataHashTo(), supportedNodeIp, previousNodeIp, "ok");
 		previousNodeIp = service.getPrevious(previousNodeIp);
 		try {
-			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/3?from=" + from2 + "&to=" + to2).request();
+			new RESTRequestor("DELETE", "http://" + previousNodeIp + ":4567/dbnode/3?from=" + from2 + "&to=" + to2).request();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 		
 	}
 }

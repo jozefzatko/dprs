@@ -40,13 +40,13 @@ public class NodeAPIRequestProcessing {
 		DataNode data = getData(replica);
 		
 		if (hashFrom == null || hashTo == null) {
-			log.info("Returning ALL data");
+			log.info("Returning ALL data with id="+replica+"DATA: "+data.getData().toString());
 			return data.getData().toString();
 		}
 
 		long from = new Long(hashFrom);
 		long to = new Long(hashTo);
-		log.info("Returning data from hash: "+from+" to "+to+"\nData: "+data.toString());
+		log.info("Returning data with id="+replica+" from hash: "+from+" to "+to+"\nData: "+data.toString(from, to));
 		return data.toString(from, to);
 	}
 	
