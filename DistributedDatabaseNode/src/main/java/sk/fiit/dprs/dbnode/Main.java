@@ -14,6 +14,7 @@ import sk.fiit.dprs.dbnode.api.UserAPIRequestProcessing;
 import sk.fiit.dprs.dbnode.bootstraping.NodeInicializer;
 import sk.fiit.dprs.dbnode.bootstraping.NodeRegistrator;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
+import sk.fiit.dprs.dbnode.faultcheck.FaultCheck;
 import sk.fiit.dprs.dbnode.healthcheck.HeartBeat;
 
 /**
@@ -64,6 +65,8 @@ public class Main {
 			HeartBeat heartBeat = new HeartBeat(consulIpPort);
 			new Thread(heartBeat).start();
 			
+			FaultCheck faultCheck = new FaultCheck(id, service);
+			new Thread(faultCheck).start();
 		} catch(Exception e) {
 			e.printStackTrace();
 			logger.fatal("Cannot initialize dbnode, exiting...");

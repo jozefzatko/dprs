@@ -213,6 +213,12 @@ public class NodeTableService {
 		}
 	}
 	
+	public void deleteNode(String id){
+		NodeTableRecord record = getRecord(id);
+		
+		table.getTable().remove(record);
+	}
+	
 	/**
 	 * Write record if node is the first one
 	 * 
