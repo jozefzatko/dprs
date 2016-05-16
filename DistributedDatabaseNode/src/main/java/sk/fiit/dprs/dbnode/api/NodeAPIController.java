@@ -13,7 +13,7 @@ import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
  */
 public class NodeAPIController {
 
-	static Logger log = Logger.getLogger(UserAPIController.class.getName());
+	static Logger log = Logger.getLogger(NodeAPIController.class.getName());
 	
 	public NodeAPIController(String id, String consulURL, NodeTableService nodeTableService) {
 		
@@ -71,7 +71,7 @@ public class NodeAPIController {
 			String requestID = request.headers("X-Request-Id");
 			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " " + logMessage);
 			
-			return NodeAPIRequestProcessing.deleteDbNodeData(request.params(":replica"), request.queryParams("from"), request.queryParams("to"));
+			return NodeAPIRequestProcessing.deleteDbNodeData(request.params(":replica"), request.queryParams("from"), request.queryParams("to"), nodeTableService);
 		});
 	}
 }

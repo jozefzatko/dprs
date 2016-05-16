@@ -215,4 +215,50 @@ public class UserAPIRequestProcessing {
 		
 		return false;
 	}
+	
+	private static boolean isFirstReplicatedData(String key) {
+		
+		long hash = Hash.get(key);
+		
+		String nextNode = "";
+		try {
+			nextNode = service.getNext(InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		NodeTableRecord next = service.getRecord(nextNode);
+		long from = next.getHashFrom();
+		long to = next.getHashTo();
+		
+		if (hash >= from && hash <= to) {
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private static boolean isSecondReplicatedData(String key) {
+		
+		long hash = Hash.get(key);
+		
+		String nextNode = "";
+		try {
+			nextNode = service.getPrevious(InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		nextNode = service.getPrevious(nextNode);
+		
+		NodeTableRecord previous = service.getRecord(nextNode);
+		long from = previous.getHashFrom();
+		long to = previous.getHashTo();
+		
+		if (hash >= from && hash <= to) {
+			
+			return true;
+		}
+		
+		return false;
+	}
 }

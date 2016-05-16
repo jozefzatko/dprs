@@ -151,6 +151,7 @@ public class NodeInicializer {
 			
 			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
 			Database.getinstance().getMyData().seed(secondHalf);
+			
 			Database.getinstance().setMyDataHashFrom(from2);
 			Database.getinstance().setMyDataHashTo(to2);
 			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/2", secondHalf).request();

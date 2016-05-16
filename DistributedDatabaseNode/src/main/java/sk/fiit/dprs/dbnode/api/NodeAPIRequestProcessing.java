@@ -31,7 +31,7 @@ public class NodeAPIRequestProcessing {
 		response.append(Database.getinstance().getFirstReplica().getData().toString());
 		response.append("\n");
 		response.append(Database.getinstance().getSecondReplica().getData().toString());
-		
+		log.info("Returning data: "+response.toString());
 		return response.toString();
 	}
 	
@@ -40,13 +40,13 @@ public class NodeAPIRequestProcessing {
 		DataNode data = getData(replica);
 		
 		if (hashFrom == null || hashTo == null) {
-			
+			log.info("Returning ALL data");
 			return data.getData().toString();
 		}
 
 		long from = new Long(hashFrom);
 		long to = new Long(hashTo);
-						
+		log.info("Returning data from hash: "+from+" to "+to+"\nData: "+data.toString());
 		return data.toString(from, to);
 	}
 	
@@ -57,8 +57,9 @@ public class NodeAPIRequestProcessing {
 			try {
 				String myIp = InetAddress.getLocalHost().getHostAddress();
 				NodeTableRecord record = service.getRecord(myIp);
-				
+				log.info("Sending data to 1st replica with id: "+record.getFirstReplicaId());
 				new RESTRequestor("POST", "http://" + record.getFirstReplicaId() + ":4567/dbnode/2", dataToPost).request();
+				log.info("Sending data to 2nd replica with id: "+record.getSecondReplicaId());
 				new RESTRequestor("POST", "http://" + record.getSecondReplicaId() + ":4567/dbnode/3", dataToPost).request();
 			} catch (IOException e) {
 				log.info("FAILED TO REPLICATE DATA");
@@ -68,11 +69,27 @@ public class NodeAPIRequestProcessing {
 		return "ack";
 	}
 
-	public static String deleteDbNodeData(String replica, String hashFrom, String hashTo) {
+	public static String deleteDbNodeData(String replica, String hashFrom, String hashTo, NodeTableService service) {
 		
 		DataNode data = getData(replica);
 		
 		if (hashFrom == null || hashTo == null) {
+			
+			
+			if(Integer.parseInt(replica) == 1){
+				try {
+					String myIp = InetAddress.getLocalHost().getHostAddress();
+					NodeTableRecord record = service.getRecord(myIp);
+					log.info("Removing data from 1st replica with id: "+record.getFirstReplicaId());
+					new RESTRequestor("DELETE", "http://" + record.getFirstReplicaId() + ":4567/dbnode/2").request();
+					log.info("Removing data from 2nd replica with id: "+record.getSecondReplicaId());
+					new RESTRequestor("DELETE", "http://" + record.getSecondReplicaId() + ":4567/dbnode/3").request();
+				} catch (IOException e) {
+					log.info("FAILED TO DELETE DATA ON REPLICAS");
+					e.printStackTrace();
+				}
+			}
+			
 			
 			data.getData().clear();
 			return "ack";
@@ -80,6 +97,21 @@ public class NodeAPIRequestProcessing {
 		
 		long from = new Long(hashFrom);
 		long to = new Long(hashTo);
+		
+		if(Integer.parseInt(replica) == 1){
+			try {
+				String myIp = InetAddress.getLocalHost().getHostAddress();
+				NodeTableRecord record = service.getRecord(myIp);
+				log.info("Removing data from 1st replica with id: "+record.getFirstReplicaId()+"with hash from "+from+" to "+to);
+				new RESTRequestor("DELETE", "http://" + record.getFirstReplicaId() + ":4567/dbnode/2?from="+from+"&to="+to).request();
+				log.info("Removing data from 2nd replica with id: "+record.getSecondReplicaId()+"with hash from "+from+" to "+to);
+				new RESTRequestor("DELETE", "http://" + record.getSecondReplicaId() + ":4567/dbnode/3?from="+from+"&to="+to).request();
+			} catch (IOException e) {
+				log.info("FAILED TO DELETE DATA ON REPLICAS");
+				e.printStackTrace();
+			}
+		}
+		
 		
 		data.remove(from, to);
 		
@@ -100,7 +132,6 @@ public class NodeAPIRequestProcessing {
 		else {
 			data = Database.getinstance().getSecondReplica();
 		}
-		
 		return data;
 	}
 
