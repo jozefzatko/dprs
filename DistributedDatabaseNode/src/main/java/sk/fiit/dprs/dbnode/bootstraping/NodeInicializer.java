@@ -112,21 +112,11 @@ public class NodeInicializer {
 		}		
 		logger.info("Data should be copied from nodes where i am acting as replica");
 	}
-		
+	
+	
 	private void initializePrevious() {
 		
-		String data;
-		
-		try {
-			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/3").request();
-			data = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
-			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/3", data).request();
-			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		NodeTableRecord record = service.getRecord(supportedNodeIp);
+	NodeTableRecord record = service.getRecord(supportedNodeIp);
 		
 		long from = record.getHashFrom();
 		long to = record.getHashTo();
@@ -136,8 +126,17 @@ public class NodeInicializer {
 		long from2 = to1 + 1;
 		long to2 = to;
 		
+		
+		String data;
+		
 		try {
-			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();
+			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/3").request();
+			
+			data = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
+			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/3", data).request();
+			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
+			
+			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
 			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/2", secondHalf).request();
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
 		} catch (IOException e) {
@@ -145,5 +144,24 @@ public class NodeInicializer {
 		}
 		
 		service.updateNode(supportedNodeIp, from1, to1, null, null, null);
+		
+		
+		String previousNodeIp = service.getPrevious(supportedNodeIp);
+		try {
+			new RESTRequestor("DELETE", "http://" + previousNodeIp + ":4567/dbnode/3").request();
+			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();
+			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/3", secondHalf).request();
+			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+		previousNodeIp = service.getPrevious(previousNodeIp);
+		try {
+			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/3?from=" + from2 + "&to=" + to2).request();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
