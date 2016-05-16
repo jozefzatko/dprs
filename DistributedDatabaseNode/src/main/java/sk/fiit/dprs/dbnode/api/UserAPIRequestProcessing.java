@@ -72,10 +72,10 @@ public class UserAPIRequestProcessing {
 	 * @return acknowledgment
 	 * @throws InvalidFormatException wrong quorum or vector clock format
 	 */
-	public static String createOrUpdate(String key, String value, String quorum, String vectorClock) throws InvalidFormatException {
+	public static String createOrUpdate(String key, String value, String quorum, String vectorClock, String clientIP) throws InvalidFormatException {
 		
 		
-		log.info("createOrUpdate "+key+" value: "+value+" quorum "+quorum+ " vectorClock "+vectorClock);
+		log.info("createOrUpdate "+key+" value: "+value+" quorum "+quorum+ " vectorClock "+vectorClock+ " clientIP "+clientIP);
 		long HashKey2 = Hash.get(key);
 		log.info("HASH KLUCA "+HashKey2);
 		
@@ -102,10 +102,11 @@ public class UserAPIRequestProcessing {
 			new VectorClock(vectorClock);			
 		}
 		
-		
 		if (isMyData(key)) {
+
 			log.info("createOrUpdate isMyData");
 			DBMock.getInstance().createOrUpdate(key, value);	
+			
 			
 			String myIp = "";
 			try {
@@ -115,14 +116,25 @@ public class UserAPIRequestProcessing {
 				e1.printStackTrace();
 			}
 			NodeTableRecord record = service.getRecord(myIp);
-			log.info("DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId());
-			try {
-				
-				new RESTRequestor("POST", "http://" + record.getFirstReplicaId() + httpRequest).request();
-				new RESTRequestor("POST", "http://" + record.getSecondReplicaId() + httpRequest).request();
-			} catch (IOException e) {
-				log.info("FAILED TO REPLICATE DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId());
-				e.printStackTrace();
+			String firstReplica = record.getFirstReplicaId();
+			String secondReplica = record.getFirstReplicaId();
+			
+			boolean isFromMyReplicaOrMaster = false;
+			
+			if(clientIP.equals(firstReplica) || clientIP.equals(secondReplica)){
+				isFromMyReplicaOrMaster = true;
+			}
+			
+			if(!isFromMyReplicaOrMaster){
+				log.info("DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId()+ " clientIP "+clientIP);
+				try {
+					
+					new RESTRequestor("POST", "http://" + firstReplica + httpRequest).request();
+					new RESTRequestor("POST", "http://" + secondReplica + httpRequest).request();
+				} catch (IOException e) {
+					log.info("FAILED TO REPLICATE DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId()+ " clientIP "+clientIP);
+					e.printStackTrace();
+				}
 			}
 		}else	if (isFirstReplicatedData(key)) {
 			
@@ -142,16 +154,25 @@ public class UserAPIRequestProcessing {
 			
 			String previousNode = "";
 			previousNode = next.getSecondReplicaId();
-			log.info(" DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode);
-			try {
-				
-				new RESTRequestor("POST", "http://" + nextNode+ httpRequest).request();
-				new RESTRequestor("POST", "http://" + previousNode + httpRequest).request();
-			} catch (IOException e) {
-				log.info("FAILED TO REPLICATE DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode);
-				e.printStackTrace();
+			
+			boolean isFromMyReplicaOrMaster = false;
+			
+			if(clientIP.equals(nextNode) || clientIP.equals(previousNode)){
+				isFromMyReplicaOrMaster = true;
 			}
 			
+			if(!isFromMyReplicaOrMaster){
+				
+				log.info(" DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode+ " clientIP "+clientIP);
+				try {
+					
+					new RESTRequestor("POST", "http://" + nextNode+ httpRequest).request();
+					new RESTRequestor("POST", "http://" + previousNode + httpRequest).request();
+				} catch (IOException e) {
+					log.info("FAILED TO REPLICATE DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode+ " clientIP "+clientIP);
+					e.printStackTrace();
+				}
+			}
 			
 		}else if (isSecondReplicatedData(key)) {
 			log.info("createOrUpdate isSecondReplicatedData");
@@ -172,14 +193,23 @@ public class UserAPIRequestProcessing {
 			String secondNode = "";
 			secondNode = next.getFirstReplicaId();
 			
-			log.info("data patrie mastrovi DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode);
-			try {
-				
-				new RESTRequestor("POST", "http://" + nextNode+ httpRequest).request();
-				new RESTRequestor("POST", "http://" + secondNode + httpRequest).request();
-			} catch (IOException e) {
-				log.info("FAILED TO REPLICATE DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode);
-				e.printStackTrace();
+			boolean isFromMyReplicaOrMaster = false;
+			
+			if(clientIP.equals(nextNode) || clientIP.equals(secondNode)){
+				isFromMyReplicaOrMaster = true;
+			}
+			
+			if(!isFromMyReplicaOrMaster){
+					
+				log.info("data patrie mastrovi DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode+ " clientIP "+clientIP);
+				try {
+					
+					new RESTRequestor("POST", "http://" + nextNode+ httpRequest).request();
+					new RESTRequestor("POST", "http://" + secondNode + httpRequest).request();
+				} catch (IOException e) {
+					log.info("FAILED TO REPLICATE DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode);
+					e.printStackTrace();
+				}
 			}
 		}else {
 			

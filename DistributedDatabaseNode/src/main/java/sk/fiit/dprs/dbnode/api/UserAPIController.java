@@ -41,10 +41,11 @@ public class UserAPIController {
 		 */
 		post("/data/:key/:value", (request, response) -> {
 			
+			
 			String requestID = request.headers("X-Request-Id");
 			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
 			return UserAPIRequestProcessing.createOrUpdate(request.params(":key"), request.params(":value"),
-						request.queryParams("quorum"), request.queryParams("vclock"));
+						request.queryParams("quorum"), request.queryParams("vclock"),request.ip());
 		});
 		
 		/*
