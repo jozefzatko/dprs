@@ -84,7 +84,7 @@ public class NodeInicializer {
 		String nextNode2 = service.getNext(nextNode1);
 		try {
 			new RESTRequestor("GET", "http://"+nextNode1+":4567/control/registerreplica/1").request();
-			new RESTRequestor("GET", "http://"+nextNode1+":4567/control/registerreplica/2").request();
+			new RESTRequestor("GET", "http://"+nextNode2+":4567/control/registerreplica/2").request();
 		} catch (IOException e) {
 			logger.info("FAILED TO REGISTER AS REPLICA");
 		}		

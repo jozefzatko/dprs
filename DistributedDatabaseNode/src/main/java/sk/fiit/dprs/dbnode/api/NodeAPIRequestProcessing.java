@@ -2,6 +2,8 @@ package sk.fiit.dprs.dbnode.api;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import sk.fiit.dprs.dbnode.api.services.RESTRequestor;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 import sk.fiit.dprs.dbnode.db.models.DataNode;
@@ -9,6 +11,7 @@ import sk.fiit.dprs.dbnode.db.models.Database;
 
 public class NodeAPIRequestProcessing {
 
+	static Logger log = Logger.getLogger(NodeAPIRequestProcessing.class.getName());
 	
 	public static String getDbNodeData(String replica, String hashFrom, String hashTo) {
 		
@@ -52,8 +55,9 @@ public class NodeAPIRequestProcessing {
 	public static boolean registerReplica(String id, String adress, int replicaNumber, NodeTableService service) {
 		
 		try {
-			new RESTRequestor("POST", "http://" + adress + ":4567/dbnode/"+(replicaNumber+1), Database.getinstance().getMyData().getData().toString()).request();
+			new RESTRequestor("POST", "http://" + adress + ":4567/dbnode/"+String.valueOf((replicaNumber+1)), Database.getinstance().getMyData().getData().toString()).request();
 		} catch (IOException e) {
+			log.info(e.getMessage());
 			return false;
 		}
 		

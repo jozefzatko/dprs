@@ -51,11 +51,14 @@ public class RESTRequestor {
 		logger.info("REST: " + this.requestMethod + " " + this.requestUrl + " " + this.params);
 		
 		if ("PUT".equals(this.requestMethod) || "POST".equals(this.requestMethod)) {
+			logger.info("VBEHOL SOM DO IFU");
 			conn.setDoOutput(true);
 			DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+			logger.info("SOM V STREDE IFU");
 			wr.writeBytes(this.params);
 			wr.flush();
 			wr.close();
+			logger.info("PREBEHOL SOM IF");
 		}
 		
 		if (conn.getResponseCode() != 200) {
