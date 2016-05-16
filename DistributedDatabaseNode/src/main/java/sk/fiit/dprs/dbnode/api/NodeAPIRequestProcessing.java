@@ -52,7 +52,7 @@ public class NodeAPIRequestProcessing {
 	public static boolean registerReplica(String id, String adress, int replicaNumber, NodeTableService service) {
 		
 		try {
-			new RESTRequestor("PUT", "http://" + adress + ":4567/dbnode/"+(replicaNumber+1), Database.getinstance().getMyData().getData().toString()).request();
+			new RESTRequestor("POST", "http://" + adress + ":4567/dbnode/"+(replicaNumber+1), Database.getinstance().getMyData().getData().toString()).request();
 		} catch (IOException e) {
 			return false;
 		}
