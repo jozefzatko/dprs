@@ -42,6 +42,6 @@ RUN ["mvn", "package"]
 
 # Run application on port 4567
 EXPOSE 4567
-ENTRYPOINT ["/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar","/usr/bin/start.sh"]
+ENTRYPOINT ["/usr/bin/start.sh"]
 
 
