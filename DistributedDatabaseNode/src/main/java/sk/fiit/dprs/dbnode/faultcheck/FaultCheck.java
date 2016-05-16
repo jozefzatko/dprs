@@ -44,45 +44,54 @@ static Logger log = Logger.getLogger(HeartBeat.class.getName());
 					new RESTRequestor("GET", "http://" +replicatedNode+ "/ping").request();
 					
 					failCounter = 0;
+					log.info("PING OD NODY: "+replicatedNode+"PREBEHOL USPESNE");
 				} catch (IOException e1) {
+					log.info("FAULT CHECK FAILOL: "+e1.getMessage());
 					failCounter++;
 				}
 				if(failCounter >= 3){
 					if(!replicatedNode.equals("")){
 						try {
-						NodeTableRecord record = service.getRecord(replicatedNode);
-						NodeTableRecord myRecord = service.getRecord(myIp);
-						String nextNodeIp = service.getNext(replicatedNode); // + 1
-						String nextNodeIp2 = service.getNext(nextNodeIp); // + 2
-						
-						String data1 = new RESTRequestor("GET", "http://"+nextNodeIp+":4567/dbnode/1").request();
-						String data2 = new RESTRequestor("GET", "http://"+nextNodeIp2+":4567/dbnode/1").request();
-											
-						Database.getinstance().getMyData().seed(Database.getinstance().getFirstReplica().getData().toString());
-						Database.getinstance().setMyDataHashTo(record.getHashTo());
-						new RESTRequestor("DELETE", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/3");
-						new RESTRequestor("POST", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/3", data1);
-						new RESTRequestor("POST", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/2", Database.getinstance().getFirstReplica().getData().toString());
-						new RESTRequestor("POST", "http://"+myRecord.getSecondReplicaId()+":4567/dbnode/3", Database.getinstance().getFirstReplica().getData().toString());
-						Database.getinstance().getFirstReplica().clear();
-						Database.getinstance().getFirstReplica().seed(data1);
-						Database.getinstance().getSecondReplica().clear();
-						Database.getinstance().getSecondReplica().seed(data2);
-						service.updateNode(nextNodeIp2, null, null, null, myIp, null);
-						service.updateNode(nextNodeIp, null, null, myIp, null, null);
-						service.updateNode(myIp, null, Database.getinstance().getMyDataHashTo(), null, null, null);
-						service.deleteNode(replicatedNode);
-						failCounter = 0;
+							log.info("ZISTIL SA MRTVY NODE:"+replicatedNode);
+							NodeTableRecord record = service.getRecord(replicatedNode);
+							NodeTableRecord myRecord = service.getRecord(myIp);
+							String nextNodeIp = service.getNext(replicatedNode); // + 1
+							String nextNodeIp2 = service.getNext(nextNodeIp); // + 2
+							
+							String data1 = new RESTRequestor("GET", "http://"+nextNodeIp+":4567/dbnode/1").request();
+							String data2 = new RESTRequestor("GET", "http://"+nextNodeIp2+":4567/dbnode/1").request();
+												
+							Database.getinstance().getMyData().seed(Database.getinstance().getFirstReplica().getData().toString());
+							Database.getinstance().setMyDataHashTo(record.getHashTo());
+							new RESTRequestor("DELETE", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/3");
+							new RESTRequestor("POST", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/3", data1);
+							new RESTRequestor("POST", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/2", Database.getinstance().getFirstReplica().getData().toString());
+							new RESTRequestor("POST", "http://"+myRecord.getSecondReplicaId()+":4567/dbnode/3", Database.getinstance().getFirstReplica().getData().toString());
+							Database.getinstance().getFirstReplica().clear();
+							Database.getinstance().getFirstReplica().seed(data1);
+							Database.getinstance().getSecondReplica().clear();
+							Database.getinstance().getSecondReplica().seed(data2);
+							log.info("TABULKA PRED ZMENAMI:"+service.printTable());
+							service.updateNode(nextNodeIp2, null, null, null, myIp, null);
+							service.updateNode(nextNodeIp, null, null, myIp, null, null);
+							service.updateNode(myIp, null, Database.getinstance().getMyDataHashTo(), null, null, null);
+							
+							service.deleteNode(replicatedNode);
+							log.info("TABULKA PO ZMENACH:"+service.printTable());
+							failCounter = 0;
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 					}
 				}else{
+					log.info("REPLICATED NODE NEBOL NAJDENY");
 					try {
 						if(failCounter==0){
 							Thread.sleep(8000);
+							continue;
 						}else{
 							Thread.sleep(1000);
+							continue;
 						}
 						
 					} catch (InterruptedException e) {

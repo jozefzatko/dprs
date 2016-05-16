@@ -289,4 +289,12 @@ public class NodeTableService {
 		this.table.initIfNeeded();
 	}
 
+	public String printTable(){
+		StringBuilder sb = new StringBuilder();
+		for(NodeTableRecord i : table.getTable()) {
+			sb.append("ID: "+i.getId()+" hashFrom: "+i.getHashFrom()+" hashTo: "+i.getHashTo()+" FirstReplica: "+i.getFirstReplicaId()+" SecondReplica: "+i.getSecondReplicaId()+"\n");
+		}
+		return sb.toString();
+	}
+	
 }
