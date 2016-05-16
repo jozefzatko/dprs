@@ -4,6 +4,8 @@ import static spark.Spark.*;
 
 import org.apache.log4j.Logger;
 
+import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
+
 /**
  * Node-to-Node API setup and controlling
  * 
@@ -13,9 +15,26 @@ public class NodeAPIController {
 
 	static Logger log = Logger.getLogger(UserAPIController.class.getName());
 	
-	public NodeAPIController(String id, String consulURL) {
+	public NodeAPIController(String id, String consulURL, NodeTableService nodeTableService) {
 		
 		String logMessage ="[ ]";
+		
+
+		
+		get("/control/registerreplica/:value", (request, response) -> {
+			String ip1replica = request.ip();
+			String replica = request.params(":value");
+			int replicaNumber = Integer.parseInt(replica);
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+"[Node: " + ip1replica + "requested to register as "+ replicaNumber +" replica for node: "+id+"]");
+			if(NodeAPIRequestProcessing.registerReplica(id, ip1replica, replicaNumber, nodeTableService)){
+				log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+"[Node: " + ip1replica + " successfully registered as "+ replicaNumber +" replica for node: "+id+"]");
+				return ("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+"[Node: " + ip1replica + " successfully registered as "+ replicaNumber +" replica for node: "+id+"]");
+			}else{
+				log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+"[Node: " + ip1replica + " failed to register as "+ replicaNumber +" replica for node: "+id+"]");
+				return ("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+"[Node: " + ip1replica + " failed to register as "+ replicaNumber +" replica for node: "+id+"]");
+			}
+		});
 		
 		/* 
 		 * READ data from DB node

@@ -56,7 +56,7 @@ public class Main {
 			new NodeInicializer(service, supportedNode).init();
 			new NodeRegistrator(consulIpPort).register();
 			
-			new NodeAPIController(id, consulIpPort);
+			new NodeAPIController(id, consulIpPort, service);
 			new UserAPIController(id, consulIpPort);
 			
 			HeartBeat heartBeat = new HeartBeat(consulIpPort);

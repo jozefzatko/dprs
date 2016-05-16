@@ -62,13 +62,7 @@ public class NodeTableService {
 	 * @return identifier of previous node
 	 */
 	public String getPrevious(String id) {
-		
-		try {
-			this.table.loadNodeTable();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+				
 		try {
 			this.table.loadNodeTable();
 		} catch (Exception e) {
@@ -95,6 +89,48 @@ public class NodeTableService {
 		for(NodeTableRecord i : table.getTable()) {
 			
 			if (hashValue == i.getHashTo()) {
+				
+				return i.getId();
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Return id of next node in order
+	 * 
+	 * @param id node identifier
+	 * @return identifier of next node
+	 */
+	public String getNext(String id) {
+				
+		try {
+			this.table.loadNodeTable();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		long hashValue = -1L;
+		
+		for(NodeTableRecord i : table.getTable()) {
+			
+			if (id.equals(i.getId())) {
+				
+				hashValue = i.getHashTo();
+				break;
+			}
+		}
+		
+		if (hashValue == 4294967295L) {
+			hashValue = 0;
+		} else {
+			hashValue += 1;
+		}
+				
+		for(NodeTableRecord i : table.getTable()) {
+			
+			if (hashValue == i.getHashFrom()) {
 				
 				return i.getId();
 			}

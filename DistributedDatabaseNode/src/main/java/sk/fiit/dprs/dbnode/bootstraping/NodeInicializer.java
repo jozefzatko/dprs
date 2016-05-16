@@ -3,6 +3,10 @@ package sk.fiit.dprs.dbnode.bootstraping;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.apache.log4j.Logger;
+
+import sk.fiit.dprs.dbnode.Main;
+import sk.fiit.dprs.dbnode.api.services.RESTRequestor;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 
 /**
@@ -11,6 +15,8 @@ import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
  * @author Jozef Zatko
  */
 public class NodeInicializer {
+	
+	static Logger logger = Logger.getLogger(NodeInicializer.class.getName());
 
 	private NodeTableService service;
 	
@@ -69,9 +75,15 @@ public class NodeInicializer {
 	private void initAsCasualNode() {
 		
 		if (this.supportedNodeIp == null) {
-			
+			logger.info("Node was started without IP of the supported Node! Exitting program!");
+			System.exit(-1);
 		}
-		
+		logger.info("Node was started with IP of the supported Node: "+supportedNodeIp);
+		String nextNode1 = service.getNext(supportedNodeIp);
+		String nextNode2 = service.getNext(nextNode1);
+		new RESTRequestor("GET", "http://"+nextNode1+":4567/control/registerreplica/1");
+		new RESTRequestor("GET", "http://"+nextNode1+":4567/control/registerreplica/2");
+		logger.info("Data should be copied from nodes where i am acting as replica");
 		// TODO: magic
 	}
 }
