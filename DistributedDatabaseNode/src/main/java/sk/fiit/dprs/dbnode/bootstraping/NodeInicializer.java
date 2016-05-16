@@ -83,7 +83,7 @@ public class NodeInicializer {
 			logger.info("Node was started without IP of the supported Node! Exitting program!");
 			System.exit(-1);
 		}
-		service.updateNode(myIp, null, null, null, null, "not ready");
+		service.addNextNode(myIp, -1, -1, "", "");
 		initializeNext();
 		initializePrevious();
 		

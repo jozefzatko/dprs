@@ -263,6 +263,18 @@ public class NodeTableService {
 			e.printStackTrace();
 		}
 	}
+	
+	public void addNextNode(String ip, long hashFrom, long hashTo, String replica1, String replica2) {
+			
+			NodeTableRecord record = new NodeTableRecord(ip, hashFrom, hashTo, replica1, replica2);
+			this.table.getTable().add(record);
+			
+			try {
+				this.table.writeNodeTable();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
 	/**
 	 * Initialize table in Consul if needed
