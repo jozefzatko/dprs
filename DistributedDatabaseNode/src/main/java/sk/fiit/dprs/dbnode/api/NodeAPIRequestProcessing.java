@@ -1,10 +1,14 @@
 package sk.fiit.dprs.dbnode.api;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.apache.log4j.Logger;
 
+import sk.fiit.dprs.dbnode.api.services.RESTRequestor;
+import sk.fiit.dprs.dbnode.consulkv.NodeTableRecord;
+import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 import sk.fiit.dprs.dbnode.db.models.DataNode;
 import sk.fiit.dprs.dbnode.db.models.Database;
 
@@ -46,9 +50,21 @@ public class NodeAPIRequestProcessing {
 		return data.toString(from, to);
 	}
 	
-	public static String postDbNodeData(String replica, String dataToPost) {
+	public static String postDbNodeData(String replica, String dataToPost, NodeTableService service) {
 		
 		getData(replica).seed(dataToPost);
+		if(Integer.parseInt(replica) == 1){
+			try {
+				String myIp = InetAddress.getLocalHost().getHostAddress();
+				NodeTableRecord record = service.getRecord(myIp);
+				
+				new RESTRequestor("POST", "http://" + record.getFirstReplicaId() + ":4567/dbnode/2", dataToPost).request();
+				new RESTRequestor("POST", "http://" + record.getSecondReplicaId() + ":4567/dbnode/3", dataToPost).request();
+			} catch (IOException e) {
+				log.info("FAILED TO REPLICATE DATA");
+				e.printStackTrace();
+			}
+		}
 		return "ack";
 	}
 

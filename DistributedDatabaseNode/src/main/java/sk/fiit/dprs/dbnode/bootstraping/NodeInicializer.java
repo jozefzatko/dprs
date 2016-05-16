@@ -44,11 +44,17 @@ public class NodeInicializer {
 		
 		switch (service.getCountofNodes()) {
 		
-			case 0: service.addFirstNode(myIp);
-			break;
+			case 0: 
+				service.addFirstNode(myIp);
+				Database.getinstance().setMyDataHashFrom(0L);
+				Database.getinstance().setMyDataHashFrom(1431655763L);
+				break;
 			
-			case 1: service.addSecondNode(myIp);
-			break;
+			case 1:
+				service.addSecondNode(myIp);
+				Database.getinstance().setMyDataHashFrom(1431655764L);
+				Database.getinstance().setMyDataHashFrom(2863311529L);
+				break;
 			
 			case 2: initAsThirdNode();
 			break;
@@ -64,6 +70,9 @@ public class NodeInicializer {
 	private void initAsThirdNode() {
 		
 		service.addThirdNode(myIp);
+		
+		Database.getinstance().setMyDataHashFrom(2863311530L);
+		Database.getinstance().setMyDataHashFrom(4294967295L);
 		
 		String third = myIp;
 		String second = service.getPrevious(third);
@@ -99,8 +108,8 @@ public class NodeInicializer {
 			String data = new RESTRequestor("GET", "http://"+nextNode1+":4567/dbnode/1").request();
 			Database.getinstance().getFirstReplica().clear();
 			Database.getinstance().getFirstReplica().seed(data);
-			logger.info("INITIALIZING: Updating node table to change 1st replica of node "+nextNode1+" to "+myIp);
-			service.updateNode(nextNode1, null, null, myIp, null, null);
+			logger.info("INITIALIZING: Updating node table to change 1st replica of node "+nextNode1+" to "+myIp+"and move 1st replica to act as 2nd");
+			service.updateNode(nextNode1, null, null, myIp, supportedNodeIp, null);
 			logger.info("INITIALIZING: "+myIp+" Successfully initialized itself to act as 1st replica for node "+nextNode1);
 			logger.info("INITIALIZING: "+myIp+" requesting data from "+nextNode2+" to act as 2nd replica.");
 			data = new RESTRequestor("GET", "http://"+nextNode2+":4567/dbnode/1").request();
@@ -141,6 +150,9 @@ public class NodeInicializer {
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
 			
 			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
+			Database.getinstance().getMyData().seed(secondHalf);
+			Database.getinstance().setMyDataHashFrom(from2);
+			Database.getinstance().setMyDataHashTo(to2);
 			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/2", secondHalf).request();
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
 		} catch (IOException e) {
@@ -160,13 +172,13 @@ public class NodeInicializer {
 			e.printStackTrace();
 		}
 		
-		
+		service.updateNode(myIp, Database.getinstance().getMyDataHashFrom(), Database.getinstance().getMyDataHashTo(), supportedNodeIp, previousNodeIp, "ok");
 		previousNodeIp = service.getPrevious(previousNodeIp);
 		try {
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/3?from=" + from2 + "&to=" + to2).request();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		service.updateNode(myIp, Database.getinstance().getMyDataHashFrom(), Database.getinstance().getMyDataHashTo(), supportedNodeIp, previousNodeIp, "ok");
+		
 	}
 }

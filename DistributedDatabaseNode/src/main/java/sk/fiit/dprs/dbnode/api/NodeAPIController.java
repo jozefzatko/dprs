@@ -57,7 +57,7 @@ public class NodeAPIController {
 			String requestID = request.headers("X-Request-Id");
 			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " " + logMessage);
 			
-			return NodeAPIRequestProcessing.postDbNodeData(request.params(":replica"), request.body());
+			return NodeAPIRequestProcessing.postDbNodeData(request.params(":replica"), request.body(), nodeTableService);
 		});
 		
 		/* 
