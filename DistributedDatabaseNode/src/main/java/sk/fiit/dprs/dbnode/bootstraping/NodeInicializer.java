@@ -44,11 +44,17 @@ public class NodeInicializer {
 		
 		switch (service.getCountofNodes()) {
 		
-			case 0: service.addFirstNode(myIp);
-			break;
+			case 0: 
+				service.addFirstNode(myIp);
+				Database.getinstance().setMyDataHashFrom(0L);
+				Database.getinstance().setMyDataHashFrom(1431655763L);
+				break;
 			
-			case 1: service.addSecondNode(myIp);
-			break;
+			case 1:
+				service.addSecondNode(myIp);
+				Database.getinstance().setMyDataHashFrom(1431655764L);
+				Database.getinstance().setMyDataHashFrom(2863311529L);
+				break;
 			
 			case 2: initAsThirdNode();
 			break;
@@ -64,6 +70,9 @@ public class NodeInicializer {
 	private void initAsThirdNode() {
 		
 		service.addThirdNode(myIp);
+		
+		Database.getinstance().setMyDataHashFrom(2863311530L);
+		Database.getinstance().setMyDataHashFrom(4294967295L);
 		
 		String third = myIp;
 		String second = service.getPrevious(third);

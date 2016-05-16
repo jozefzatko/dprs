@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import sk.fiit.dprs.dbnode.api.NodeAPIController;
 import sk.fiit.dprs.dbnode.api.UserAPIController;
+import sk.fiit.dprs.dbnode.api.UserAPIRequestProcessing;
 import sk.fiit.dprs.dbnode.bootstraping.NodeInicializer;
 import sk.fiit.dprs.dbnode.bootstraping.NodeRegistrator;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
@@ -52,6 +53,7 @@ public class Main {
 			
 			
 			NodeTableService service = new NodeTableService(consulIpPort);
+			UserAPIRequestProcessing.service = service;
 			
 			new NodeInicializer(service, supportedNode).init();
 			new NodeRegistrator(consulIpPort).register();
