@@ -83,7 +83,7 @@ public class NodeInicializer {
 		}
 		
 		initializeNext(myIp);
-		//initializePrevious();
+		initializePrevious();
 	}
 	
 	private void initializeNext(String myIp) {
@@ -116,7 +116,7 @@ public class NodeInicializer {
 	
 	private void initializePrevious() {
 		
-	NodeTableRecord record = service.getRecord(supportedNodeIp);
+		NodeTableRecord record = service.getRecord(supportedNodeIp);
 		
 		long from = record.getHashFrom();
 		long to = record.getHashTo();
