@@ -128,7 +128,8 @@ public class UserAPIController {
 			
 			String requestID = request.headers("X-Request-Id");
 			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " "+logMessage);
-			
+			log.info("CHYBA exception" + e.getMessage());
+			e.printStackTrace();
 			response.status(400);
 			response.body(e.toString());
 		});

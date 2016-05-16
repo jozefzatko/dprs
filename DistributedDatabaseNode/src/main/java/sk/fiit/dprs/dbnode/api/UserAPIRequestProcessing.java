@@ -118,7 +118,6 @@ public class UserAPIRequestProcessing {
 			log.info("DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId());
 			try {
 				
-			
 				new RESTRequestor("POST", "http://" + record.getFirstReplicaId() + httpRequest).request();
 				new RESTRequestor("POST", "http://" + record.getSecondReplicaId() + httpRequest).request();
 			} catch (IOException e) {
@@ -297,6 +296,7 @@ public class UserAPIRequestProcessing {
 		
 		long hash = Hash.get(key);
 		
+		log.info("POROVANNIE HASHU Hash: "+hash+" FROM: "+Database.getinstance().getMyDataHashFrom()+" TO: "+Database.getinstance().getMyDataHashTo() );
 		if (hash < Database.getinstance().getMyDataHashFrom() || hash > Database.getinstance().getMyDataHashTo()) {
 			
 			return false;
