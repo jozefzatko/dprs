@@ -67,6 +67,7 @@ public class Main {
 			
 			FaultCheck faultCheck = new FaultCheck(id, service);
 			new Thread(faultCheck).start();
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 			logger.fatal("Cannot initialize dbnode, exiting...");
