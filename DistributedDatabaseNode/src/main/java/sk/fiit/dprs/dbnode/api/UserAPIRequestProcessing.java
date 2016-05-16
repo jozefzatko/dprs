@@ -6,12 +6,16 @@ import java.net.UnknownHostException;
 import com.google.gson.Gson;
 
 import sk.fiit.dprs.dbnode.api.services.PingRequestor;
+import sk.fiit.dprs.dbnode.consulkv.NodeTableRecord;
+import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 import sk.fiit.dprs.dbnode.db.DBMock;
+import sk.fiit.dprs.dbnode.db.models.Database;
 import sk.fiit.dprs.dbnode.exceptions.CannotPingNodeException;
 import sk.fiit.dprs.dbnode.exceptions.InvalidFormatException;
 import sk.fiit.dprs.dbnode.exceptions.MissingKeyException;
 import sk.fiit.dprs.dbnode.models.Quorum;
 import sk.fiit.dprs.dbnode.models.VectorClock;
+import sk.fiit.dprs.dbnode.utils.Hash;
 
 /**
  * Java methods behind User-to-Node API calls
@@ -19,6 +23,8 @@ import sk.fiit.dprs.dbnode.models.VectorClock;
  * @author Jozef Zatko
  */
 public class UserAPIRequestProcessing {
+	
+	public static NodeTableService service = null;
 	
 	/**
 	 * Process READ from database
@@ -30,6 +36,18 @@ public class UserAPIRequestProcessing {
 	 * @throws MissingKeyException wrong key
 	 */
 	public static String get(String key, String quorum) throws InvalidFormatException, MissingKeyException {
+		
+		if (isMyData(key)) {
+			
+		}
+		
+		if (isDataOfFirstReplica(key)) {
+			
+		}
+		
+		if (isDataOfSecondReplica(key)) {
+			
+		}
 		
 		if(quorum != null) {
 			new Quorum(quorum);
@@ -139,5 +157,62 @@ public class UserAPIRequestProcessing {
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		
 		return "[{ipAdress:" + ip + "},{customID:" + id + "}]";
+	}
+	
+	private static boolean isMyData(String key) {
+		
+		long hash = Hash.get(key);
+		
+		if (hash < Database.getinstance().getMyDataHashFrom() || hash > Database.getinstance().getMyDataHashTo()) {
+			
+			return false;
+		}
+		return true;
+	}
+	
+	private static boolean isDataOfFirstReplica(String key) {
+		
+		long hash = Hash.get(key);
+		
+		String previousNode = "";
+		try {
+			previousNode = service.getPrevious(InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		NodeTableRecord previous = service.getRecord(previousNode);
+		long from = previous.getHashFrom();
+		long to = previous.getHashTo();
+		
+		if (hash >= from && hash <= to) {
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private static boolean isDataOfSecondReplica(String key) {
+		
+		long hash = Hash.get(key);
+		
+		String previousNode = "";
+		try {
+			previousNode = service.getPrevious(InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		previousNode = service.getPrevious(previousNode);
+		
+		NodeTableRecord previous = service.getRecord(previousNode);
+		long from = previous.getHashFrom();
+		long to = previous.getHashTo();
+		
+		if (hash >= from && hash <= to) {
+			
+			return true;
+		}
+		
+		return false;
 	}
 }
