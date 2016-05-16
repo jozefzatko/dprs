@@ -15,6 +15,31 @@ public class NodeTableService {
 	}
 	
 	/**
+	 * Get record by ID
+	 * 
+	 * @param id identifier
+	 * @return node record
+	 */
+	public NodeTableRecord getRecord(String id) {
+		
+		try {
+			this.table.loadNodeTable();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		for(NodeTableRecord i : table.getTable()) {
+			
+			if (id.equals(i.getId())) {
+				
+				return i;
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Return count of DB nodes in cluster
 	 * 
 	 * @return count of nodes

@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import sk.fiit.dprs.dbnode.Main;
 import sk.fiit.dprs.dbnode.api.services.RESTRequestor;
+import sk.fiit.dprs.dbnode.consulkv.NodeTableRecord;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 
 /**
@@ -79,6 +80,13 @@ public class NodeInicializer {
 			logger.info("Node was started without IP of the supported Node! Exitting program!");
 			System.exit(-1);
 		}
+		
+		initializePrevious();
+		initializeNext();
+	}
+	
+	private void initializePrevious() {
+	
 		logger.info("Node was started with IP of the supported Node: "+supportedNodeIp);
 		String nextNode1 = service.getNext(supportedNodeIp);
 		String nextNode2 = service.getNext(nextNode1);
@@ -89,6 +97,39 @@ public class NodeInicializer {
 			logger.info("FAILED TO REGISTER AS REPLICA");
 		}		
 		logger.info("Data should be copied from nodes where i am acting as replica");
-		// TODO: magic
+	}
+		
+	private void initializeNext() {
+		
+		String data;
+		
+		try {
+			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/3").request();
+			data = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
+			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/3", data).request();
+			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		NodeTableRecord record = service.getRecord(supportedNodeIp);
+		
+		long from = record.getHashFrom();
+		long to = record.getHashTo();
+		
+		long from1 = from;
+		long to1 = from + (to - from) / 2;
+		long from2 = to1 + 1;
+		long to2 = to;
+		
+		try {
+			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();
+			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/2", secondHalf).request();
+			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		service.updateNode(supportedNodeIp, from1, to1, null, null, null);
 	}
 }
