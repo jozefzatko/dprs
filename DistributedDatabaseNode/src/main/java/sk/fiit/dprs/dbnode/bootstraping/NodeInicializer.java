@@ -150,10 +150,12 @@ public class NodeInicializer {
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2").request();
 			
 			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
+			logger.info("UKLADAM SI MOJE DATA:"+secondHalf);
 			Database.getinstance().getMyData().seed(secondHalf);
 			
 			Database.getinstance().setMyDataHashFrom(from2);
 			Database.getinstance().setMyDataHashTo(to2);
+			logger.info("POSIELAM DATA NA MOJU PRVU REPLIKU: "+secondHalf);
 			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/2", secondHalf).request();
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/1?from=" + from2 + "&to=" + to2).request();
 		} catch (IOException e) {
@@ -166,6 +168,7 @@ public class NodeInicializer {
 		String previousNodeIp = service.getPrevious(supportedNodeIp);
 		try {
 			new RESTRequestor("DELETE", "http://" + previousNodeIp + ":4567/dbnode/3").request();
+			//nasledujuci riadok je podozrivy
 			String secondHalf = new RESTRequestor("GET", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();
 			new RESTRequestor("POST", "http://" + supportedNodeIp + ":4567/dbnode/3", secondHalf).request();
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();

@@ -72,7 +72,7 @@ public class NodeAPIRequestProcessing {
 	public static String deleteDbNodeData(String replica, String hashFrom, String hashTo, NodeTableService service) {
 		
 		DataNode data = getData(replica);
-		
+		log.info("ATTEMPTING TO DELETE DATA WITH ID="+replica);
 		if (hashFrom == null || hashTo == null) {
 			
 			
@@ -80,9 +80,9 @@ public class NodeAPIRequestProcessing {
 				try {
 					String myIp = InetAddress.getLocalHost().getHostAddress();
 					NodeTableRecord record = service.getRecord(myIp);
-					log.info("Removing data from 1st replica with id: "+record.getFirstReplicaId());
+					log.info("Removing ALL data from 1st replica with id: "+record.getFirstReplicaId());
 					new RESTRequestor("DELETE", "http://" + record.getFirstReplicaId() + ":4567/dbnode/2").request();
-					log.info("Removing data from 2nd replica with id: "+record.getSecondReplicaId());
+					log.info("Removing ALL data from 2nd replica with id: "+record.getSecondReplicaId());
 					new RESTRequestor("DELETE", "http://" + record.getSecondReplicaId() + ":4567/dbnode/3").request();
 				} catch (IOException e) {
 					log.info("FAILED TO DELETE DATA ON REPLICAS");

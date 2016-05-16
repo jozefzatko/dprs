@@ -55,7 +55,7 @@ public class NodeAPIController {
 		post("/dbnode/:replica", (request, response) -> {
 			
 			String requestID = request.headers("X-Request-Id");
-			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " " + logMessage);
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " " + request.body());
 			
 			return NodeAPIRequestProcessing.postDbNodeData(request.params(":replica"), request.body(), nodeTableService);
 		});
