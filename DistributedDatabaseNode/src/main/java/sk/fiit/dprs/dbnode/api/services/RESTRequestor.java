@@ -51,6 +51,12 @@ public class RESTRequestor {
 		logger.info("REST: " + this.requestMethod + " " + this.requestUrl + " " + this.params);
 		
 		if ("PUT".equals(this.requestMethod) || "POST".equals(this.requestMethod)) {
+			
+			if ("{}".equals(params)) {
+				
+				params = "";
+			}
+			
 			logger.info("VBEHOL SOM DO IFU");
 			conn.setDoOutput(true);
 			DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
