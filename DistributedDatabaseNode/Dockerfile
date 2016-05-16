@@ -22,10 +22,12 @@ RUN apt-get install -y sudo
 ADD filebeat /usr/bin/filebeat
 ADD filebeat.template.json /usr/bin/filebeat.template.json
 ADD filebeat.yml /usr/bin/filebeat.yml
+ADD log4j.log /workdir/log4j.log
 
 RUN chmod +x /usr/bin/filebeat
 RUN chmod +x /usr/bin/filebeat.template.json
 RUN chmod +x /usr/bin/filebeat.yml
+RUN chmod +x /workdir/log4j.log
 
 RUN wget http://stedolan.github.io/jq/download/linux64/jq
 RUN chmod +x ./jq
