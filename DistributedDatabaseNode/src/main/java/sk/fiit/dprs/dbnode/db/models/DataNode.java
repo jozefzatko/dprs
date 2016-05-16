@@ -156,4 +156,8 @@ public class DataNode {
 	public HashMap<Long, DatabaseRecord> getData() {
 		return data;
 	}
+	
+	public void clear(){
+		data.clear();
+	}
 }

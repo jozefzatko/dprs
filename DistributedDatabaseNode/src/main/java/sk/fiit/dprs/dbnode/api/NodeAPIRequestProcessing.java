@@ -52,25 +52,6 @@ public class NodeAPIRequestProcessing {
 		return "ack";
 	}
 	
-	public static boolean registerReplica(String id, String adress, int replicaNumber, NodeTableService service) {
-		
-		try {
-			new RESTRequestor("POST", "http://" + adress + ":4567/dbnode/"+String.valueOf((replicaNumber+1)), Database.getinstance().getMyData().getData().toString()).request();
-		} catch (IOException e) {
-			log.info(e.getMessage());
-			return false;
-		}
-		
-		if (replicaNumber == 1) {
-			service.updateNode(id, null, null, String.valueOf(replicaNumber), null, null);
-		} else {
-			if (replicaNumber == 2) {
-				service.updateNode(id, null, null, null, String.valueOf(replicaNumber), null);
-			}
-		}
-		
-		return true;
-	}
 	
 	private static DataNode getData(String replica) {
 		

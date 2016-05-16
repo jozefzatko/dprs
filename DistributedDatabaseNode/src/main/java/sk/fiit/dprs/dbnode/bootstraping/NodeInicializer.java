@@ -10,6 +10,7 @@ import sk.fiit.dprs.dbnode.Main;
 import sk.fiit.dprs.dbnode.api.services.RESTRequestor;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableRecord;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
+import sk.fiit.dprs.dbnode.db.models.Database;
 
 /**
  * Initialize this DB node before being registered
@@ -81,25 +82,38 @@ public class NodeInicializer {
 			System.exit(-1);
 		}
 		
+		initializeNext(myIp);
 		initializePrevious();
-		initializeNext();
 	}
 	
-	private void initializePrevious() {
+	private void initializeNext(String myIp) {
 	
 		logger.info("Node was started with IP of the supported Node: "+supportedNodeIp);
 		String nextNode1 = service.getNext(supportedNodeIp);
 		String nextNode2 = service.getNext(nextNode1);
 		try {
-			new RESTRequestor("GET", "http://"+nextNode1+":4567/control/registerreplica/1").request();
-			new RESTRequestor("GET", "http://"+nextNode2+":4567/control/registerreplica/2").request();
+			logger.info("INITIALIZING: "+myIp+" requesting data from "+nextNode1+" to act as 1st replica.");
+			String data = new RESTRequestor("GET", "http://"+nextNode1+":4567/dbnode/1").request();
+			Database.getinstance().getFirstReplica().clear();
+			Database.getinstance().getFirstReplica().seed(data);
+			logger.info("INITIALIZING: Updating node table to change 1st replica of node "+nextNode1+" to "+myIp);
+			service.updateNode(nextNode1, null, null, myIp, null, null);
+			logger.info("INITIALIZING: "+myIp+" Successfully initialized itself to act as 1st replica for node "+nextNode1);
+			logger.info("INITIALIZING: "+myIp+" requesting data from "+nextNode2+" to act as 2nd replica.");
+			data = new RESTRequestor("GET", "http://"+nextNode2+":4567/dbnode/1").request();
+			Database.getinstance().getSecondReplica().clear();
+			Database.getinstance().getSecondReplica().seed(data);
+			logger.info("INITIALIZING: Updating node table to change 2nd replica of node "+nextNode2+" to "+myIp);
+			service.updateNode(nextNode2, null, null, null, myIp, null);
+			logger.info("INITIALIZING: "+myIp+" Successfully initialized itself to act as 2nd replica for node "+nextNode2);
 		} catch (IOException e) {
-			logger.info("FAILED TO REGISTER AS REPLICA");
+			logger.info(e.getMessage());
+			logger.info("FAILED TO REGISTER AS REPLICA for 2 next nodes");
 		}		
 		logger.info("Data should be copied from nodes where i am acting as replica");
 	}
 		
-	private void initializeNext() {
+	private void initializePrevious() {
 		
 		String data;
 		
