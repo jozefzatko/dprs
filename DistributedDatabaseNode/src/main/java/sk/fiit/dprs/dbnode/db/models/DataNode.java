@@ -69,7 +69,7 @@ public class DataNode {
 	 */
 	public void seed(String newData) {
 		
-		if("".equals(newData)) {
+		if("".equals(newData) || "{}".equals(newData)) {
 			
 			return;
 		}
