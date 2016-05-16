@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
  */
 public class Database {
 
+	private static Database instance = null;
+	
 	private String myIP;
 	
 	private long myDataHashFrom;
@@ -20,22 +22,28 @@ public class Database {
 	private DataNode secondReplica;
 	
 	
-	public Database(long from, long to) {
-		
+	private Database() {
+	
 		try {
 			this.myIP = InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 		
-		this.myDataHashFrom = from;
-		this.myDataHashTo = to;
-		
 		this.myData = new DataNode();
 		this.firstReplica = new DataNode();
 		this.secondReplica = new DataNode();
 	}
 
+	public static Database getinstance() {
+		
+		if (instance == null) {
+			
+			instance = new Database();
+		}
+		
+		return instance;
+	}
 	
 	public String getMyIP() {
 		return myIP;
