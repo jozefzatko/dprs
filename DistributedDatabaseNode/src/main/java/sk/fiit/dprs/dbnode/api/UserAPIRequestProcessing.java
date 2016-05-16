@@ -74,6 +74,9 @@ public class UserAPIRequestProcessing {
 	 */
 	public static String createOrUpdate(String key, String value, String quorum, String vectorClock) throws InvalidFormatException {
 		
+		
+		log.info("createOrUpdate "+key+" value: "+value+" quorum "+quorum+ " vectorClock "+vectorClock);
+		
 		if(quorum != null) {
 			new Quorum(quorum);
 		}
@@ -84,7 +87,7 @@ public class UserAPIRequestProcessing {
 		
 		
 		if (isMyData(key)) {
-			
+			log.info("isMyData");
 			DBMock.getInstance().createOrUpdate(key, value);	
 			
 			String myIp = "";
@@ -106,6 +109,7 @@ public class UserAPIRequestProcessing {
 			}
 		}else	if (isFirstReplicatedData(key)) {
 			
+			log.info("isFirstReplicatedData");
 			DBMock.getInstance().createOrUpdate(key, value);	
 			
 			String myIp = "";
@@ -133,7 +137,7 @@ public class UserAPIRequestProcessing {
 			
 			
 		}else if (isSecondReplicatedData(key)) {
-			
+			log.info("isSecondReplicatedData");
 			DBMock.getInstance().createOrUpdate(key, value);	
 			
 			String myIp = "";
@@ -163,7 +167,7 @@ public class UserAPIRequestProcessing {
 		}else {
 			
 			
-			
+			log.info("Else ");
 			long HashKey = Hash.get(key);
 			
 			String myIp = "";
