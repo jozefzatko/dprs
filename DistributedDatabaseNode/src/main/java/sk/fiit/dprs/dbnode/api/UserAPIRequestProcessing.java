@@ -1,11 +1,15 @@
 package sk.fiit.dprs.dbnode.api;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
 import sk.fiit.dprs.dbnode.api.services.PingRequestor;
+import sk.fiit.dprs.dbnode.api.services.RESTRequestor;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableRecord;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 import sk.fiit.dprs.dbnode.db.DBMock;
@@ -23,6 +27,8 @@ import sk.fiit.dprs.dbnode.utils.Hash;
  * @author Jozef Zatko
  */
 public class UserAPIRequestProcessing {
+	
+	static Logger log = Logger.getLogger(NodeAPIRequestProcessing.class.getName());
 	
 	public static NodeTableService service = null;
 	
@@ -75,8 +81,114 @@ public class UserAPIRequestProcessing {
 		if(vectorClock != null) {
 			new VectorClock(vectorClock);			
 		}
+		
+		
+		if (isMyData(key)) {
 			
-		DBMock.getInstance().createOrUpdate(key, value);
+			DBMock.getInstance().createOrUpdate(key, value);	
+			
+			String myIp = "";
+			try {
+				myIp = InetAddress.getLocalHost().getHostAddress();
+			} catch (UnknownHostException e1) {
+				
+				e1.printStackTrace();
+			}
+			NodeTableRecord record = service.getRecord(myIp);
+			log.info("DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId());
+			try {
+				;
+				new RESTRequestor("POST", "http://" + record.getFirstReplicaId() + ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+				new RESTRequestor("POST", "http://" + record.getSecondReplicaId() + ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+			} catch (IOException e) {
+				log.info("FAILED TO REPLICATE DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId());
+				e.printStackTrace();
+			}
+		}else	if (isFirstReplicatedData(key)) {
+			
+			DBMock.getInstance().createOrUpdate(key, value);	
+			
+			String myIp = "";
+			try {
+				myIp = InetAddress.getLocalHost().getHostAddress();
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
+			}
+			
+			String nextNode = "";
+			nextNode = service.getNext(myIp);
+			NodeTableRecord next = service.getRecord(nextNode); // this is master
+			
+			String previousNode = "";
+			previousNode = next.getSecondReplicaId();
+			log.info(" DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode);
+			try {
+				;
+				new RESTRequestor("POST", "http://" + nextNode+ ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+				new RESTRequestor("POST", "http://" + previousNode + ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+			} catch (IOException e) {
+				log.info("FAILED TO REPLICATE DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode);
+				e.printStackTrace();
+			}
+			
+			
+		}else if (isSecondReplicatedData(key)) {
+			
+			DBMock.getInstance().createOrUpdate(key, value);	
+			
+			String myIp = "";
+			try {
+				myIp = InetAddress.getLocalHost().getHostAddress();
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
+			}
+			
+			String nextNode = "";
+			nextNode = service.getNext(myIp);
+			nextNode = service.getNext(nextNode);
+			NodeTableRecord next = service.getRecord(nextNode); // this is master
+			
+			String secondNode = "";
+			secondNode = next.getFirstReplicaId();
+			
+			log.info("data patrie mastrovi DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode);
+			try {
+				;
+				new RESTRequestor("POST", "http://" + nextNode+ ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+				new RESTRequestor("POST", "http://" + secondNode + ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+			} catch (IOException e) {
+				log.info("FAILED TO REPLICATE DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode);
+				e.printStackTrace();
+			}
+		}else {
+			
+			
+			
+			long HashKey = Hash.get(key);
+			
+			String myIp = "";
+			try {
+				myIp = InetAddress.getLocalHost().getHostAddress();
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
+			}
+			NodeTableRecord record = service.getRecord(myIp);
+			
+			String nextNode = "";
+			nextNode = service.findNodeByHash(HashKey);
+			NodeTableRecord next = service.getRecord(nextNode); 
+			
+			log.info("data nepatria ziadnej replike DATA OTHER FROM NODE "+myIp+" TO NODE: "+nextNode);
+			try {
+				
+				new RESTRequestor("POST", "http://" + next+ ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+			} catch (IOException e) {
+				log.info("FAILED TO Sent DATA OTHER FROM NODE "+myIp+" TO NODE: "+nextNode);
+				e.printStackTrace();
+			}
+			
+		}
+		
 		
 		return "Successfuly added [" + key + "," + value + "] to database.";
 	}
@@ -244,15 +356,15 @@ public class UserAPIRequestProcessing {
 		
 		String nextNode = "";
 		try {
-			nextNode = service.getPrevious(InetAddress.getLocalHost().getHostAddress());
+			nextNode = service.getNext(InetAddress.getLocalHost().getHostAddress());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		nextNode = service.getPrevious(nextNode);
+		nextNode = service.getNext(nextNode);
 		
-		NodeTableRecord previous = service.getRecord(nextNode);
-		long from = previous.getHashFrom();
-		long to = previous.getHashTo();
+		NodeTableRecord next = service.getRecord(nextNode);
+		long from = next.getHashFrom();
+		long to = next.getHashTo();
 		
 		if (hash >= from && hash <= to) {
 			
