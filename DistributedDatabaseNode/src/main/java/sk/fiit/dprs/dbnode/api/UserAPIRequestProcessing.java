@@ -28,7 +28,7 @@ import sk.fiit.dprs.dbnode.utils.Hash;
  */
 public class UserAPIRequestProcessing {
 	
-	static Logger log = Logger.getLogger(NodeAPIRequestProcessing.class.getName());
+	static Logger log = Logger.getLogger(UserAPIRequestProcessing.class.getName());
 	
 	public static NodeTableService service = null;
 	
@@ -76,6 +76,23 @@ public class UserAPIRequestProcessing {
 		
 		
 		log.info("createOrUpdate "+key+" value: "+value+" quorum "+quorum+ " vectorClock "+vectorClock);
+		long HashKey2 = Hash.get(key);
+		log.info("HASH KLUCA "+HashKey2);
+		
+		String httpRequest = "";
+		httpRequest = ":4567/data/"+key+"/"+value;
+		
+		if(quorum!=null || vectorClock!=null){
+			httpRequest = httpRequest+"?";
+		}
+		
+		if(quorum!=null && vectorClock !=null){
+			httpRequest = httpRequest+"quorum="+quorum+"&vclock="+vectorClock; 
+		}else if(quorum!=null && vectorClock ==null){
+			httpRequest = httpRequest+"quorum="+quorum; 
+		}else if(quorum==null && vectorClock !=null){
+			httpRequest = httpRequest+"vclock="+vectorClock; 
+		}
 		
 		if(quorum != null) {
 			new Quorum(quorum);
@@ -87,7 +104,7 @@ public class UserAPIRequestProcessing {
 		
 		
 		if (isMyData(key)) {
-			log.info("isMyData");
+			log.info("createOrUpdate isMyData");
 			DBMock.getInstance().createOrUpdate(key, value);	
 			
 			String myIp = "";
@@ -100,16 +117,17 @@ public class UserAPIRequestProcessing {
 			NodeTableRecord record = service.getRecord(myIp);
 			log.info("DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId());
 			try {
-				;
-				new RESTRequestor("POST", "http://" + record.getFirstReplicaId() + ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
-				new RESTRequestor("POST", "http://" + record.getSecondReplicaId() + ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+				
+			
+				new RESTRequestor("POST", "http://" + record.getFirstReplicaId() + httpRequest).request();
+				new RESTRequestor("POST", "http://" + record.getSecondReplicaId() + httpRequest).request();
 			} catch (IOException e) {
 				log.info("FAILED TO REPLICATE DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId());
 				e.printStackTrace();
 			}
 		}else	if (isFirstReplicatedData(key)) {
 			
-			log.info("isFirstReplicatedData");
+			log.info("createOrUpdate isFirstReplicatedData");
 			DBMock.getInstance().createOrUpdate(key, value);	
 			
 			String myIp = "";
@@ -127,9 +145,9 @@ public class UserAPIRequestProcessing {
 			previousNode = next.getSecondReplicaId();
 			log.info(" DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode);
 			try {
-				;
-				new RESTRequestor("POST", "http://" + nextNode+ ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
-				new RESTRequestor("POST", "http://" + previousNode + ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+				
+				new RESTRequestor("POST", "http://" + nextNode+ httpRequest).request();
+				new RESTRequestor("POST", "http://" + previousNode + httpRequest).request();
 			} catch (IOException e) {
 				log.info("FAILED TO REPLICATE DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode);
 				e.printStackTrace();
@@ -137,7 +155,7 @@ public class UserAPIRequestProcessing {
 			
 			
 		}else if (isSecondReplicatedData(key)) {
-			log.info("isSecondReplicatedData");
+			log.info("createOrUpdate isSecondReplicatedData");
 			DBMock.getInstance().createOrUpdate(key, value);	
 			
 			String myIp = "";
@@ -157,9 +175,9 @@ public class UserAPIRequestProcessing {
 			
 			log.info("data patrie mastrovi DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode);
 			try {
-				;
-				new RESTRequestor("POST", "http://" + nextNode+ ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
-				new RESTRequestor("POST", "http://" + secondNode + ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+				
+				new RESTRequestor("POST", "http://" + nextNode+ httpRequest).request();
+				new RESTRequestor("POST", "http://" + secondNode + httpRequest).request();
 			} catch (IOException e) {
 				log.info("FAILED TO REPLICATE DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode);
 				e.printStackTrace();
