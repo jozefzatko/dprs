@@ -175,6 +175,7 @@ public class NodeInicializer {
 			new RESTRequestor("DELETE", "http://" + supportedNodeIp + ":4567/dbnode/2?from=" + from2 + "&to=" + to2).request();*/
 			if(!secondHalf.equals(""))
 			new RESTRequestor("POST", "http://" + previousNodeIp + ":4567/dbnode/3", secondHalf).request();
+			service.updateNode(myIp, Database.getinstance().getMyDataHashFrom(), Database.getinstance().getMyDataHashTo(), supportedNodeIp, previousNodeIp, "ok");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
