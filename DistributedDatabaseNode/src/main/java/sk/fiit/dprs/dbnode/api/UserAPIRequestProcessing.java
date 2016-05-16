@@ -44,23 +44,26 @@ public class UserAPIRequestProcessing {
 	 */
 	public static String get(String key, String quorum) throws InvalidFormatException, MissingKeyException {
 		
+		long hashKey = Hash.get(key);
+		DatabaseRecord record = null;
+		
 		if (isMyData(key)) {
-			
+			record = Database.getinstance().getMyData().get(hashKey);
 		}
 		
 		if (isDataOfFirstReplica(key)) {
-			
+			record = Database.getinstance().getFirstReplica().get(hashKey);
 		}
 		
 		if (isDataOfSecondReplica(key)) {
-			
+			record = Database.getinstance().getSecondReplica().get(hashKey);
 		}
 		
 		if(quorum != null) {
 			new Quorum(quorum);
 		}
 		
-		return new Gson().toJson(DBMock.getInstance().get(key)) ;
+		return new Gson().toJson(record) ;
 	}
 	
 	/**

@@ -35,59 +35,61 @@ static Logger log = Logger.getLogger(HeartBeat.class.getName());
 		
 		while(true) {
 			String replicatedNode = "";
-			try {
-				
-				replicatedNode = service.getNext(myIp);
-				log.info("Found out ID of next node for fail check: " + replicatedNode);
-				
-				new RESTRequestor("GET", "http://" +replicatedNode+ "/ping").request();
-				
-				failCounter = 0;
-			} catch (IOException e1) {
-				failCounter++;
-			}
-			if(failCounter >= 3){
-				if(!replicatedNode.equals("")){
-					try {
-					NodeTableRecord record = service.getRecord(replicatedNode);
-					NodeTableRecord myRecord = service.getRecord(myIp);
-					String nextNodeIp = service.getNext(replicatedNode); // + 1
-					String nextNodeIp2 = service.getNext(nextNodeIp); // + 2
+			if(service.getCountofNodes()>3){
+				try {
 					
-					String data1 = new RESTRequestor("GET", "http://"+nextNodeIp+":4567/dbnode/1").request();
-					String data2 = new RESTRequestor("GET", "http://"+nextNodeIp2+":4567/dbnode/1").request();
-										
-					Database.getinstance().getMyData().seed(Database.getinstance().getFirstReplica().getData().toString());
-					Database.getinstance().setMyDataHashTo(record.getHashTo());
-					new RESTRequestor("DELETE", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/3");
-					new RESTRequestor("POST", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/3", data1);
-					new RESTRequestor("POST", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/2", Database.getinstance().getFirstReplica().getData().toString());
-					new RESTRequestor("POST", "http://"+myRecord.getSecondReplicaId()+":4567/dbnode/3", Database.getinstance().getFirstReplica().getData().toString());
-					Database.getinstance().getFirstReplica().clear();
-					Database.getinstance().getFirstReplica().seed(data1);
-					Database.getinstance().getSecondReplica().clear();
-					Database.getinstance().getSecondReplica().seed(data2);
-					service.updateNode(nextNodeIp2, null, null, null, myIp, null);
-					service.updateNode(nextNodeIp, null, null, myIp, null, null);
-					service.updateNode(myIp, null, Database.getinstance().getMyDataHashTo(), null, null, null);
-					service.deleteNode(replicatedNode);
+					replicatedNode = service.getNext(myIp);
+					log.info("Found out ID of next node for fail check: " + replicatedNode);
+					
+					new RESTRequestor("GET", "http://" +replicatedNode+ "/ping").request();
+					
 					failCounter = 0;
-					} catch (IOException e) {
+				} catch (IOException e1) {
+					failCounter++;
+				}
+				if(failCounter >= 3){
+					if(!replicatedNode.equals("")){
+						try {
+						NodeTableRecord record = service.getRecord(replicatedNode);
+						NodeTableRecord myRecord = service.getRecord(myIp);
+						String nextNodeIp = service.getNext(replicatedNode); // + 1
+						String nextNodeIp2 = service.getNext(nextNodeIp); // + 2
+						
+						String data1 = new RESTRequestor("GET", "http://"+nextNodeIp+":4567/dbnode/1").request();
+						String data2 = new RESTRequestor("GET", "http://"+nextNodeIp2+":4567/dbnode/1").request();
+											
+						Database.getinstance().getMyData().seed(Database.getinstance().getFirstReplica().getData().toString());
+						Database.getinstance().setMyDataHashTo(record.getHashTo());
+						new RESTRequestor("DELETE", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/3");
+						new RESTRequestor("POST", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/3", data1);
+						new RESTRequestor("POST", "http://"+myRecord.getFirstReplicaId()+":4567/dbnode/2", Database.getinstance().getFirstReplica().getData().toString());
+						new RESTRequestor("POST", "http://"+myRecord.getSecondReplicaId()+":4567/dbnode/3", Database.getinstance().getFirstReplica().getData().toString());
+						Database.getinstance().getFirstReplica().clear();
+						Database.getinstance().getFirstReplica().seed(data1);
+						Database.getinstance().getSecondReplica().clear();
+						Database.getinstance().getSecondReplica().seed(data2);
+						service.updateNode(nextNodeIp2, null, null, null, myIp, null);
+						service.updateNode(nextNodeIp, null, null, myIp, null, null);
+						service.updateNode(myIp, null, Database.getinstance().getMyDataHashTo(), null, null, null);
+						service.deleteNode(replicatedNode);
+						failCounter = 0;
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}else{
+					try {
+						if(failCounter==0){
+							Thread.sleep(8000);
+						}else{
+							Thread.sleep(1000);
+						}
+						
+					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-				}
-			}else{
-				try {
-					if(failCounter==0){
-						Thread.sleep(10000);
-					}else{
-						Thread.sleep(600);
-					}
 					
-				} catch (InterruptedException e) {
-					e.printStackTrace();
 				}
-				
 			}
 
 		}
