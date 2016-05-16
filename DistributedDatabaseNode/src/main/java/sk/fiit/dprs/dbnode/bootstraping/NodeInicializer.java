@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import javax.xml.crypto.Data;
+
 import org.apache.log4j.Logger;
 
 import sk.fiit.dprs.dbnode.Main;
@@ -67,9 +69,9 @@ public class NodeInicializer {
 		String second = service.getPrevious(third);
 		String first = service.getPrevious(second);
 		
-		service.updateNode(first,  null, null, second, third,  "ok");
-		service.updateNode(second, null, null, third,  first,  "ok");
-		service.updateNode(third,  null, null, first,  second, "ok");
+		service.updateNode(first,  null, null, third, second,  "ok");
+		service.updateNode(second, null, null, first,  third,  "ok");
+		service.updateNode(third,  null, null, second,  first, "ok");
 	}
 	
 	/**
@@ -81,12 +83,13 @@ public class NodeInicializer {
 			logger.info("Node was started without IP of the supported Node! Exitting program!");
 			System.exit(-1);
 		}
-		
-		initializeNext(myIp);
+		service.updateNode(myIp, null, null, null, null, "not ready");
+		initializeNext();
 		initializePrevious();
+		
 	}
 	
-	private void initializeNext(String myIp) {
+	private void initializeNext() {
 	
 		logger.info("Node was started with IP of the supported Node: "+supportedNodeIp);
 		String nextNode1 = service.getNext(supportedNodeIp);
@@ -110,6 +113,7 @@ public class NodeInicializer {
 			logger.info(e.getMessage());
 			logger.info("FAILED TO REGISTER AS REPLICA for 2 next nodes");
 		}		
+		
 		logger.info("Data should be copied from nodes where i am acting as replica");
 	}
 	
@@ -163,5 +167,6 @@ public class NodeInicializer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		service.updateNode(myIp, Database.getinstance().getMyDataHashFrom(), Database.getinstance().getMyDataHashTo(), supportedNodeIp, previousNodeIp, "ok");
 	}
 }
