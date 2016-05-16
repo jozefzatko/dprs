@@ -14,6 +14,7 @@ import sk.fiit.dprs.dbnode.consulkv.NodeTableRecord;
 import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 import sk.fiit.dprs.dbnode.db.DBMock;
 import sk.fiit.dprs.dbnode.db.models.Database;
+import sk.fiit.dprs.dbnode.db.models.DatabaseRecord;
 import sk.fiit.dprs.dbnode.exceptions.CannotPingNodeException;
 import sk.fiit.dprs.dbnode.exceptions.InvalidFormatException;
 import sk.fiit.dprs.dbnode.exceptions.MissingKeyException;
@@ -108,6 +109,7 @@ public class UserAPIRequestProcessing {
 			DBMock.getInstance().createOrUpdate(key, value);	
 			
 			
+			
 			String myIp = "";
 			try {
 				myIp = InetAddress.getLocalHost().getHostAddress();
@@ -117,7 +119,7 @@ public class UserAPIRequestProcessing {
 			}
 			NodeTableRecord record = service.getRecord(myIp);
 			String firstReplica = record.getFirstReplicaId();
-			String secondReplica = record.getFirstReplicaId();
+			String secondReplica = record.getSecondReplicaId();
 			
 			boolean isFromMyReplicaOrMaster = false;
 			
@@ -126,6 +128,21 @@ public class UserAPIRequestProcessing {
 			}
 			
 			if(!isFromMyReplicaOrMaster){
+				
+				long hashKey=Hash.get(key);
+				DatabaseRecord data = Database.getinstance().getMyData().get(hashKey);
+				if(data==null){
+					VectorClock vClockDefinition =  new VectorClock("[1,0,0]");
+					Database.getinstance().getMyData().create(hashKey, value, vClockDefinition);
+				}else{
+					VectorClock vClockDefinition =  data.getVectorClock();
+					int originalValue = vClockDefinition.getOriginalValue();
+					vClockDefinition.setOriginalValue(originalValue+1);
+					
+					
+					Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
+				}
+				
 				log.info("DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId()+ " clientIP "+clientIP);
 				try {
 					
@@ -163,6 +180,18 @@ public class UserAPIRequestProcessing {
 			
 			if(!isFromMyReplicaOrMaster){
 				
+				long hashKey=Hash.get(key);
+				DatabaseRecord data = Database.getinstance().getFirstReplica().get(hashKey);
+				if(data==null){
+					VectorClock vClockDefinition =  new VectorClock("[0,1,0]");
+					Database.getinstance().getFirstReplica().create(hashKey, value, vClockDefinition);
+				}else{
+					VectorClock vClockDefinition =  data.getVectorClock();
+					int firstReplicaValue = vClockDefinition.getFirstReplica();
+					vClockDefinition.setFirstReplica(firstReplicaValue+1);
+					Database.getinstance().getFirstReplica().update(hashKey, value, vClockDefinition);
+				}
+				
 				log.info(" DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode+ " clientIP "+clientIP);
 				try {
 					
@@ -176,6 +205,7 @@ public class UserAPIRequestProcessing {
 			
 		}else if (isSecondReplicatedData(key)) {
 			log.info("createOrUpdate isSecondReplicatedData");
+			
 			DBMock.getInstance().createOrUpdate(key, value);	
 			
 			String myIp = "";
@@ -201,6 +231,18 @@ public class UserAPIRequestProcessing {
 			
 			if(!isFromMyReplicaOrMaster){
 					
+				long hashKey=Hash.get(key);
+				DatabaseRecord data = Database.getinstance().getSecondReplica().get(hashKey);
+				if(data==null){
+					VectorClock vClockDefinition =  new VectorClock("[0,0,1]");
+					Database.getinstance().getSecondReplica().create(hashKey, value, vClockDefinition);
+				}else{
+					VectorClock vClockDefinition =  data.getVectorClock();
+					int secondReplicaValue = vClockDefinition.getSecondReplica();
+					vClockDefinition.setSecondReplica(secondReplicaValue+1);
+					Database.getinstance().getSecondReplica().update(hashKey, value, vClockDefinition);
+				}
+				
 				log.info("data patrie mastrovi DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode+ " clientIP "+clientIP);
 				try {
 					
@@ -213,7 +255,7 @@ public class UserAPIRequestProcessing {
 			}
 		}else {
 			
-			
+						
 			log.info("Else ");
 			long HashKey = Hash.get(key);
 			

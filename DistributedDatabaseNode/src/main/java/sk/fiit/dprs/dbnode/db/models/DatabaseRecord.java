@@ -52,6 +52,15 @@ public class DatabaseRecord {
 		return vClock;
 	}
 	
+	
+	public VectorClock getvClock() {
+		return vClock;
+	}
+
+	public void setvClock(VectorClock vClock) {
+		this.vClock = vClock;
+	}
+
 	public Date getCreated() {
 		return created;
 	}

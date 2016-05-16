@@ -56,4 +56,23 @@ public class VectorClock {
 	public String getvClockDefinition() {
 		return vClockDefinition;
 	}
+	
+	public void setOriginalValue(int originalValue) {
+		this.originalValue = originalValue;
+	}
+
+	public void setFirstReplica(int firstReplica) {
+		this.firstReplica = firstReplica;
+	}
+
+	public void setSecondReplica(int secondReplica) {
+		this.secondReplica = secondReplica;
+	}
+
+	@Override
+	public String toString() {
+		
+		String vClockDef= "["+originalValue+","+firstReplica+","+secondReplica+"]";
+		return vClockDef;
+	}
 }

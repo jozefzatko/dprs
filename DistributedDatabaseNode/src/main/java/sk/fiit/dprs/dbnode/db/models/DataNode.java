@@ -2,6 +2,9 @@ package sk.fiit.dprs.dbnode.db.models;
 
 import java.util.HashMap;
 
+import sk.fiit.dprs.dbnode.exceptions.InvalidVectorClockFormatException;
+import sk.fiit.dprs.dbnode.models.VectorClock;
+
 /**
  * Model of one Data node
  * my data / first replica / second replica
@@ -20,7 +23,7 @@ public class DataNode {
 	/*
 	 * GET
 	 */
-	public DatabaseRecord get(String key) {
+	public DatabaseRecord get(Long key) {
 		
 		if(data.containsKey(key)) {
 			
@@ -32,9 +35,9 @@ public class DataNode {
 	/*
 	 * CREATE
 	 */
-	public void create(Long key, String value, String vClockDefinition) {
+	public void create(Long key, String value, VectorClock vClockDefinition) {
 		
-		DatabaseRecord record = new DatabaseRecord(value, vClockDefinition);
+		DatabaseRecord record = new DatabaseRecord(value, vClockDefinition.toString());
 		
 		data.put(key, record);
 	}
@@ -42,12 +45,13 @@ public class DataNode {
 	/*
 	 * UPDATE
 	 */
-	public void update(Long key, String value, String vClockDefinition) {
+	public void update(Long key, String value, VectorClock vClockDefinition) {
 		
 		DatabaseRecord record = data.get(key);
 		
 		record.setValue(value);
-		// TODO: zmena vClocku
+		record.setvClock(vClockDefinition);
+		
 		
 		data.put(key, record);
 	}
@@ -84,9 +88,17 @@ public class DataNode {
 			String value = newDatArr[i].split("=")[1];
 			
 			String data = value.split(";")[0];
-			String vClock = value.split(";")[1];
+			String vClockDefinition = value.split(";")[1];
 			
-			create(key, data, vClock);
+			VectorClock vClock ;
+			try {
+				vClock = new VectorClock(vClockDefinition);
+				create(key, data, vClock);
+			} catch (InvalidVectorClockFormatException e) {
+				e.printStackTrace();
+			}
+			
+			
 		}
 	}
 	
