@@ -1,5 +1,8 @@
 package sk.fiit.dprs.dbnode.api;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.apache.log4j.Logger;
 
 import sk.fiit.dprs.dbnode.db.models.DataNode;
@@ -13,6 +16,12 @@ public class NodeAPIRequestProcessing {
 		
 		StringBuilder response = new StringBuilder();
 		
+		try {
+			response.append(InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		response.append("\n\n");
 		response.append(Database.getinstance().getMyData().getData().toString());
 		response.append("\n");
 		response.append(Database.getinstance().getFirstReplica().getData().toString());
