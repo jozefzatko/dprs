@@ -46,8 +46,9 @@ static Logger log = Logger.getLogger(HeartBeat.class.getName());
 					failCounter = 0;
 					log.info("PING OD NODY: "+replicatedNode+"PREBEHOL USPESNE");
 				} catch (IOException e1) {
-					log.info("FAULT CHECK FAILOL: "+e1.getMessage());
+					
 					failCounter++;
+					log.info("FAULT CHECK FAILOL: "+e1.getMessage()+"POKUS CISLO:"+failCounter);
 				}
 				if(failCounter >= 3){
 					if(!replicatedNode.equals("")){

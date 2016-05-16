@@ -47,6 +47,7 @@ public class RESTRequestor {
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod(this.requestMethod);
 		conn.setRequestProperty("Accept", "application/json");
+		conn.setConnectTimeout(5000);
 			
 		logger.info("REST: " + this.requestMethod + " " + this.requestUrl + " " + this.params);
 		

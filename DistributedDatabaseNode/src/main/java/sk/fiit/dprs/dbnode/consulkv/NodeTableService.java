@@ -217,6 +217,12 @@ public class NodeTableService {
 		NodeTableRecord record = getRecord(id);
 		
 		table.getTable().remove(record);
+		try {
+			table.writeNodeTable();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -290,6 +296,11 @@ public class NodeTableService {
 	}
 
 	public String printTable(){
+		try {
+			table.loadNodeTable();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		StringBuilder sb = new StringBuilder();
 		for(NodeTableRecord i : table.getTable()) {
 			sb.append("ID: "+i.getId()+" hashFrom: "+i.getHashFrom()+" hashTo: "+i.getHashTo()+" FirstReplica: "+i.getFirstReplicaId()+" SecondReplica: "+i.getSecondReplicaId()+"\n");
