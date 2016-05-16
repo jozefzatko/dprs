@@ -41,7 +41,7 @@ static Logger log = Logger.getLogger(HeartBeat.class.getName());
 					replicatedNode = service.getNext(myIp);
 					log.info("Found out ID of next node for fail check: " + replicatedNode);
 					
-					new RESTRequestor("GET", "http://" +replicatedNode+ "/ping").request();
+					new RESTRequestor("GET", "http://" +replicatedNode+ ":4567/ping").request();
 					
 					failCounter = 0;
 					log.info("PING OD NODY: "+replicatedNode+"PREBEHOL USPESNE");
@@ -83,21 +83,22 @@ static Logger log = Logger.getLogger(HeartBeat.class.getName());
 							e.printStackTrace();
 						}
 					}
-				}else{
-					log.info("REPLICATED NODE NEBOL NAJDENY");
-					try {
-						if(failCounter==0){
-							Thread.sleep(8000);
-							continue;
-						}else{
-							Thread.sleep(1000);
-							continue;
+					else{
+						log.info("REPLICATED NODE NEBOL NAJDENY");
+						try {
+							if(failCounter==0){
+								Thread.sleep(8000);
+								continue;
+							}else{
+								Thread.sleep(1000);
+								continue;
+							}
+							
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-						
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
 					
+					}
 				}
 			}
 			
