@@ -61,21 +61,7 @@ public class NodeAPIController {
 			String requestID = request.headers("X-Request-Id");
 			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " " + logMessage);
 			
-			return NodeAPIRequestProcessing.postDbNodeData(request.params(":replica"), request.queryParams("from"), request.queryParams("to"));
-		});
-		
-		/* 
-		 * PUT data to DB node
-		 * 
-		 * PUT http://localhost:4567/dbnode/1
-		 * PUT http://localhost:4567/dbnode/1?from=12345&to=54321
-		 */
-		put("/dbnode/:replica", (request, response) -> {
-			
-			String requestID = request.headers("X-Request-Id");
-			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " " + logMessage);
-			
-			return NodeAPIRequestProcessing.putDbNodeData(request.params(":replica"), request.queryParams("from"), request.queryParams("to"));
+			return NodeAPIRequestProcessing.postDbNodeData(request.params(":replica"), request.body());
 		});
 		
 		/* 
