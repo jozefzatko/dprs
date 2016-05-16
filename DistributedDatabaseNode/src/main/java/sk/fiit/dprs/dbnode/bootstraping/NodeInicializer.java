@@ -83,7 +83,7 @@ public class NodeInicializer {
 		}
 		
 		initializeNext(myIp);
-		initializePrevious();
+		//initializePrevious();
 	}
 	
 	private void initializeNext(String myIp) {
