@@ -1,17 +1,26 @@
 package sk.fiit.dprs.dbnode.api;
 
-import java.io.IOException;
-
 import org.apache.log4j.Logger;
 
-import sk.fiit.dprs.dbnode.api.services.RESTRequestor;
-import sk.fiit.dprs.dbnode.consulkv.NodeTableService;
 import sk.fiit.dprs.dbnode.db.models.DataNode;
 import sk.fiit.dprs.dbnode.db.models.Database;
 
 public class NodeAPIRequestProcessing {
 
 	static Logger log = Logger.getLogger(NodeAPIRequestProcessing.class.getName());
+	
+	public static String getDbNodeData() {
+		
+		StringBuilder response = new StringBuilder();
+		
+		response.append(Database.getinstance().getMyData().getData().toString());
+		response.append("\n");
+		response.append(Database.getinstance().getFirstReplica().getData().toString());
+		response.append("\n");
+		response.append(Database.getinstance().getSecondReplica().getData().toString());
+		
+		return response.toString();
+	}
 	
 	public static String getDbNodeData(String replica, String hashFrom, String hashTo) {
 		

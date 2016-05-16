@@ -18,7 +18,20 @@ public class NodeAPIController {
 	public NodeAPIController(String id, String consulURL, NodeTableService nodeTableService) {
 		
 		String logMessage ="[ ]";
-				
+		
+		/* 
+		 * READ all data from DB node
+		 * 
+		 * GET http://localhost:4567/dbnode
+		 */
+		get("/dbnode", (request, response) -> {
+			
+			String requestID = request.headers("X-Request-Id");
+			log.info("requestID: "+requestID+" method: "+request.requestMethod() + " " + request.url() + " " + logMessage);
+			
+			return NodeAPIRequestProcessing.getDbNodeData();
+		});
+		
 		/* 
 		 * READ data from DB node
 		 * 
