@@ -65,8 +65,8 @@ public class Main {
 			HeartBeat heartBeat = new HeartBeat(consulIpPort);
 			new Thread(heartBeat).start();
 			
-			/*FaultCheck faultCheck = new FaultCheck(id, service);
-			new Thread(faultCheck).start();*/
+			FaultCheck faultCheck = new FaultCheck(id, service);
+			new Thread(faultCheck).start();
 		} catch(Exception e) {
 			e.printStackTrace();
 			logger.fatal("Cannot initialize dbnode, exiting...");

@@ -91,6 +91,14 @@ static Logger log = Logger.getLogger(HeartBeat.class.getName());
 					
 				}
 			}
+			
+			try {
+					Thread.sleep(8000);
+					
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
 
 		}
 	}
