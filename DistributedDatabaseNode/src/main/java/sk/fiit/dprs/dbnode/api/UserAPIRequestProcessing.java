@@ -51,11 +51,11 @@ public class UserAPIRequestProcessing {
 			record = Database.getinstance().getMyData().get(hashKey);
 		}
 		
-		if (isDataOfFirstReplica(key)) {
+		if (isFirstReplicatedData(key)) {
 			record = Database.getinstance().getFirstReplica().get(hashKey);
 		}
 		
-		if (isDataOfSecondReplica(key)) {
+		if (isSecondReplicatedData(key)) {
 			record = Database.getinstance().getSecondReplica().get(hashKey);
 		}
 		
@@ -86,17 +86,11 @@ public class UserAPIRequestProcessing {
 		String httpRequest = "";
 		httpRequest = ":4567/data/"+key+"/"+value;
 		
-		if(quorum!=null || vectorClock!=null){
-			httpRequest = httpRequest+"?";
-		}
 		
-		if(quorum!=null && vectorClock !=null){
-			httpRequest = httpRequest+"quorum="+quorum+"&vclock="+vectorClock; 
-		}else if(quorum!=null && vectorClock ==null){
-			httpRequest = httpRequest+"quorum="+quorum; 
-		}else if(quorum==null && vectorClock !=null){
-			httpRequest = httpRequest+"vclock="+vectorClock; 
-		}
+		
+		
+		
+		
 		
 		if(quorum != null) {
 			new Quorum(quorum);
@@ -135,6 +129,7 @@ public class UserAPIRequestProcessing {
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getMyData().get(hashKey);
 				if(data==null){
+					httpRequest =  httpRequest +"?vclock="+"[1,0,0]";
 					VectorClock vClockDefinition =  new VectorClock("[1,0,0]");
 					Database.getinstance().getMyData().create(hashKey, value, vClockDefinition);
 				}else{
@@ -142,7 +137,8 @@ public class UserAPIRequestProcessing {
 					int originalValue = vClockDefinition.getOriginalValue();
 					vClockDefinition.setOriginalValue(originalValue+1);
 					
-					
+					//TODO magic
+					httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
 					Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
 				}
 				
@@ -160,7 +156,7 @@ public class UserAPIRequestProcessing {
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getMyData().get(hashKey);
 				if(data==null){
-					if(vectorClock == null) vectorClock = "[1,0,0]";
+				
 					VectorClock vClockDefinition =  new VectorClock(vectorClock);
 					Database.getinstance().getMyData().create(hashKey, value, vClockDefinition);
 				}else{
@@ -168,11 +164,8 @@ public class UserAPIRequestProcessing {
 					int originalValue = vClockDefinition.getOriginalValue();
 					vClockDefinition.setOriginalValue(originalValue+1);*/
 					VectorClock vClockDefinition;
-					if(vectorClock == null){
-						vClockDefinition =  data.getVectorClock();
-					}else {
-						vClockDefinition =  new VectorClock(vectorClock);
-					}
+					vClockDefinition =  new VectorClock(vectorClock);
+					//TODO magic
 					Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
 				}
 				
@@ -208,18 +201,22 @@ public class UserAPIRequestProcessing {
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getFirstReplica().get(hashKey);
 				if(data==null){
+					httpRequest =  httpRequest +"?vclock="+"[0,1,0]";
 					VectorClock vClockDefinition =  new VectorClock("[0,1,0]");
 					Database.getinstance().getFirstReplica().create(hashKey, value, vClockDefinition);
 				}else{
 					VectorClock vClockDefinition =  data.getVectorClock();
 					int firstReplicaValue = vClockDefinition.getFirstReplica();
 					vClockDefinition.setFirstReplica(firstReplicaValue+1);
+					
+					//TODO magic
+					httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
 					Database.getinstance().getFirstReplica().update(hashKey, value, vClockDefinition);
 				}
 				
 				log.info(" DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode+ " clientIP "+clientIP);
 				try {
-					
+					httpRequest = 
 					new RESTRequestor("POST", "http://" + nextNode+ httpRequest).request();
 					new RESTRequestor("POST", "http://" + previousNode + httpRequest).request();
 				} catch (IOException e) {
@@ -231,7 +228,7 @@ public class UserAPIRequestProcessing {
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getFirstReplica().get(hashKey);
 				if(data==null){
-					if(vectorClock == null) vectorClock = "[1,0,0]";
+					
 					VectorClock vClockDefinition =  new VectorClock(vectorClock);
 					Database.getinstance().getFirstReplica().create(hashKey, value, vClockDefinition);
 				}else{
@@ -239,11 +236,8 @@ public class UserAPIRequestProcessing {
 					int originalValue = vClockDefinition.getOriginalValue();
 					vClockDefinition.setOriginalValue(originalValue+1);*/
 					VectorClock vClockDefinition;
-					if(vectorClock == null){
-						vClockDefinition =  data.getVectorClock();
-					}else {
-						vClockDefinition =  new VectorClock(vectorClock);
-					}
+					vClockDefinition =  new VectorClock(vectorClock);
+					//TODO magic
 					Database.getinstance().getFirstReplica().update(hashKey, value, vClockDefinition);
 				}
 			}
@@ -279,12 +273,16 @@ public class UserAPIRequestProcessing {
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getSecondReplica().get(hashKey);
 				if(data==null){
-					VectorClock vClockDefinition =  new VectorClock("[0,1,0]");
+					httpRequest =  httpRequest +"?vclock="+"[0,0,1]";
+					VectorClock vClockDefinition =  new VectorClock("[0,0,1]");
 					Database.getinstance().getSecondReplica().create(hashKey, value, vClockDefinition);
 				}else{
 					VectorClock vClockDefinition =  data.getVectorClock();
 					int secondReplicaValue = vClockDefinition.getSecondReplica();
 					vClockDefinition.setSecondReplica(secondReplicaValue+1);
+					
+					//TODO magic
+					httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
 					Database.getinstance().getSecondReplica().update(hashKey, value, vClockDefinition);
 				}
 				
@@ -302,7 +300,7 @@ public class UserAPIRequestProcessing {
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getSecondReplica().get(hashKey);
 				if(data==null){
-					if(vectorClock == null) vectorClock = "[0,0,1]";
+	
 					VectorClock vClockDefinition =  new VectorClock(vectorClock);
 					Database.getinstance().getSecondReplica().create(hashKey, value, vClockDefinition);
 				}else{
@@ -310,15 +308,12 @@ public class UserAPIRequestProcessing {
 					int originalValue = vClockDefinition.getOriginalValue();
 					vClockDefinition.setOriginalValue(originalValue+1);*/
 					VectorClock vClockDefinition;
-					if(vectorClock == null){
-						vClockDefinition =  data.getVectorClock();
-					}else {
-						vClockDefinition =  new VectorClock(vectorClock);
-					}
+					vClockDefinition =  new VectorClock(vectorClock);
+					//TODO magic
 					Database.getinstance().getSecondReplica().update(hashKey, value, vClockDefinition);
 				}
 			}
-		}else {
+		}else{
 			
 						
 			log.info("Else ");
@@ -330,7 +325,6 @@ public class UserAPIRequestProcessing {
 			} catch (UnknownHostException e1) {
 				e1.printStackTrace();
 			}
-			NodeTableRecord record = service.getRecord(myIp);
 			
 			String nextNode = "";
 			nextNode = service.findNodeByHash(HashKey);
