@@ -359,8 +359,17 @@ public class UserAPIRequestProcessing {
 			
 			log.info("data nepatria ziadnej replike DATA OTHER FROM NODE "+myIp+" TO NODE: "+nextNode);
 			try {
+				if(quorum!=null&&vectorClock!=null){
+					new RESTRequestor("POST", "http://" + next+ ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
+				}else if(quorum!=null){
+					new RESTRequestor("POST", "http://" + next+ ":4567/data/"+key+"/"+value+"?quorum="+quorum).request();
+				}else if(vectorClock!=null){
+					new RESTRequestor("POST", "http://" + next+ ":4567/data/"+key+"/"+value+"?vclock="+vectorClock).request();
+				}else{
+					new RESTRequestor("POST", "http://" + next+ ":4567/data/"+key+"/"+value).request();
+				}
+					
 				
-				new RESTRequestor("POST", "http://" + next+ ":4567/data/"+key+"/"+value+"?quorum="+quorum+"&vclock="+vectorClock).request();
 			} catch (IOException e) {
 				log.info("FAILED TO Sent DATA OTHER FROM NODE "+myIp+" TO NODE: "+nextNode);
 				e.printStackTrace();
