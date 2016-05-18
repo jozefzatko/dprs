@@ -155,7 +155,29 @@ public class UserAPIRequestProcessing {
 					log.info("FAILED TO REPLICATE DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId()+ " clientIP "+clientIP);
 					e.printStackTrace();
 				}
+			}else{
+				
+				long hashKey=Hash.get(key);
+				DatabaseRecord data = Database.getinstance().getMyData().get(hashKey);
+				if(data==null){
+					if(vectorClock == null) vectorClock = "[1,0,0]";
+					VectorClock vClockDefinition =  new VectorClock(vectorClock);
+					Database.getinstance().getMyData().create(hashKey, value, vClockDefinition);
+				}else{
+					/*VectorClock vClockDefinition =  data.getVectorClock();
+					int originalValue = vClockDefinition.getOriginalValue();
+					vClockDefinition.setOriginalValue(originalValue+1);*/
+					VectorClock vClockDefinition;
+					if(vectorClock == null){
+						vClockDefinition =  data.getVectorClock();
+					}else {
+						vClockDefinition =  new VectorClock(vectorClock);
+					}
+					Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
+				}
+				
 			}
+			
 		}else	if (isFirstReplicatedData(key)) {
 			
 			log.info("createOrUpdate isFirstReplicatedData");
