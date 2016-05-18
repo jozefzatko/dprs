@@ -131,7 +131,7 @@ public class UserAPIRequestProcessing {
 			}
 			
 			if(!isFromMyReplicaOrMaster){
-				
+				log.info("isFirstReplicatedData createOrUpdate isFromMyReplicaOrMaster=false");
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getMyData().get(hashKey);
 				if(data==null){
@@ -156,7 +156,7 @@ public class UserAPIRequestProcessing {
 					e.printStackTrace();
 				}
 			}else{
-				
+				log.info("isMyData createOrUpdate isFromMyReplicaOrMaster=true");
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getMyData().get(hashKey);
 				if(data==null){
@@ -204,7 +204,7 @@ public class UserAPIRequestProcessing {
 			}
 			
 			if(!isFromMyReplicaOrMaster){
-				
+				log.info("isFirstReplicatedData createOrUpdate isFromMyReplicaOrMaster=false");
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getFirstReplica().get(hashKey);
 				if(data==null){
@@ -226,6 +226,8 @@ public class UserAPIRequestProcessing {
 					log.info("FAILED TO REPLICATE DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode+ " clientIP "+clientIP);
 					e.printStackTrace();
 				}
+			}else{
+				log.info("isFirstReplicatedData createOrUpdate isFromMyReplicaOrMaster=true");
 			}
 			
 		}else if (isSecondReplicatedData(key)) {
@@ -255,7 +257,7 @@ public class UserAPIRequestProcessing {
 			}
 			
 			if(!isFromMyReplicaOrMaster){
-					
+				log.info("isSecondReplicatedData  createOrUpdate isFromMyReplicaOrMaster=false");
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getSecondReplica().get(hashKey);
 				if(data==null){
@@ -277,6 +279,8 @@ public class UserAPIRequestProcessing {
 					log.info("FAILED TO REPLICATE DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode);
 					e.printStackTrace();
 				}
+			}else{
+				log.info("isSecondReplicatedData createOrUpdate isFromMyReplicaOrMaster=true");
 			}
 		}else {
 			
