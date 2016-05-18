@@ -228,6 +228,24 @@ public class UserAPIRequestProcessing {
 				}
 			}else{
 				log.info("isFirstReplicatedData createOrUpdate isFromMyReplicaOrMaster=true");
+				long hashKey=Hash.get(key);
+				DatabaseRecord data = Database.getinstance().getFirstReplica().get(hashKey);
+				if(data==null){
+					if(vectorClock == null) vectorClock = "[1,0,0]";
+					VectorClock vClockDefinition =  new VectorClock(vectorClock);
+					Database.getinstance().getFirstReplica().create(hashKey, value, vClockDefinition);
+				}else{
+					/*VectorClock vClockDefinition =  data.getVectorClock();
+					int originalValue = vClockDefinition.getOriginalValue();
+					vClockDefinition.setOriginalValue(originalValue+1);*/
+					VectorClock vClockDefinition;
+					if(vectorClock == null){
+						vClockDefinition =  data.getVectorClock();
+					}else {
+						vClockDefinition =  new VectorClock(vectorClock);
+					}
+					Database.getinstance().getFirstReplica().update(hashKey, value, vClockDefinition);
+				}
 			}
 			
 		}else if (isSecondReplicatedData(key)) {
@@ -261,7 +279,7 @@ public class UserAPIRequestProcessing {
 				long hashKey=Hash.get(key);
 				DatabaseRecord data = Database.getinstance().getSecondReplica().get(hashKey);
 				if(data==null){
-					VectorClock vClockDefinition =  new VectorClock("[0,0,1]");
+					VectorClock vClockDefinition =  new VectorClock("[0,1,0]");
 					Database.getinstance().getSecondReplica().create(hashKey, value, vClockDefinition);
 				}else{
 					VectorClock vClockDefinition =  data.getVectorClock();
@@ -281,6 +299,24 @@ public class UserAPIRequestProcessing {
 				}
 			}else{
 				log.info("isSecondReplicatedData createOrUpdate isFromMyReplicaOrMaster=true");
+				long hashKey=Hash.get(key);
+				DatabaseRecord data = Database.getinstance().getSecondReplica().get(hashKey);
+				if(data==null){
+					if(vectorClock == null) vectorClock = "[0,0,1]";
+					VectorClock vClockDefinition =  new VectorClock(vectorClock);
+					Database.getinstance().getSecondReplica().create(hashKey, value, vClockDefinition);
+				}else{
+					/*VectorClock vClockDefinition =  data.getVectorClock();
+					int originalValue = vClockDefinition.getOriginalValue();
+					vClockDefinition.setOriginalValue(originalValue+1);*/
+					VectorClock vClockDefinition;
+					if(vectorClock == null){
+						vClockDefinition =  data.getVectorClock();
+					}else {
+						vClockDefinition =  new VectorClock(vectorClock);
+					}
+					Database.getinstance().getSecondReplica().update(hashKey, value, vClockDefinition);
+				}
 			}
 		}else {
 			
