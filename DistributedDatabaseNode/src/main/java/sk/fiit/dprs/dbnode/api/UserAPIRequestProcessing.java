@@ -139,13 +139,12 @@ public class UserAPIRequestProcessing {
 					vClockDefinition.setOriginalValue(originalValue+1);
 					
 					boolean isNewerOrSame = old.isNewerOrSame(old, vClockDefinition);
-					/*if(isNewerOrSame){
-						//TODO magic
-						httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
-						Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
-					}*/
 					httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
-					Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
+					if(isNewerOrSame){
+						//TODO magic
+						Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
+					}
+					
 				}
 				
 				log.info("DATA FROM MASTER "+myIp+" TO REPLICAS: "+record.getFirstReplicaId()+" "+record.getSecondReplicaId()+ " clientIP "+clientIP);
@@ -171,8 +170,13 @@ public class UserAPIRequestProcessing {
 					vClockDefinition.setOriginalValue(originalValue+1);*/
 					VectorClock vClockDefinition;
 					vClockDefinition =  new VectorClock(vectorClock);
-					//TODO magic
-					Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
+					
+					boolean isNewerOrSame = vClockDefinition.isNewerOrSame(data.getvClock(), vClockDefinition);
+					if(isNewerOrSame){
+						//TODO magic
+						Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
+					}
+					
 				}
 				
 			}
@@ -211,13 +215,19 @@ public class UserAPIRequestProcessing {
 					VectorClock vClockDefinition =  new VectorClock("[0,1,0]");
 					Database.getinstance().getFirstReplica().create(hashKey, value, vClockDefinition);
 				}else{
-					VectorClock vClockDefinition =  data.getVectorClock();
-					int firstReplicaValue = vClockDefinition.getFirstReplica();
-					vClockDefinition.setFirstReplica(firstReplicaValue+1);
 					
-					//TODO magic
+					
+					VectorClock vClockDefinition =  data.getVectorClock();
+					int originalValue = vClockDefinition.getOriginalValue();
+					VectorClock old = new VectorClock(vClockDefinition.toString());
+					vClockDefinition.setOriginalValue(originalValue+1);
+					
+					boolean isNewerOrSame = old.isNewerOrSame(old, vClockDefinition);
 					httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
-					Database.getinstance().getFirstReplica().update(hashKey, value, vClockDefinition);
+					if(isNewerOrSame){
+						//TODO magic
+						Database.getinstance().getFirstReplica().update(hashKey, value, vClockDefinition);
+					}
 				}
 				
 				log.info(" DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode+ " clientIP "+clientIP);
@@ -242,8 +252,13 @@ public class UserAPIRequestProcessing {
 					vClockDefinition.setOriginalValue(originalValue+1);*/
 					VectorClock vClockDefinition;
 					vClockDefinition =  new VectorClock(vectorClock);
-					//TODO magic
-					Database.getinstance().getFirstReplica().update(hashKey, value, vClockDefinition);
+					
+					boolean isNewerOrSame = vClockDefinition.isNewerOrSame(data.getvClock(), vClockDefinition);
+					if(isNewerOrSame){
+						//TODO magic
+						Database.getinstance().getFirstReplica().update(hashKey, value, vClockDefinition);
+					}
+					
 				}
 			}
 			
@@ -283,12 +298,16 @@ public class UserAPIRequestProcessing {
 					Database.getinstance().getSecondReplica().create(hashKey, value, vClockDefinition);
 				}else{
 					VectorClock vClockDefinition =  data.getVectorClock();
-					int secondReplicaValue = vClockDefinition.getSecondReplica();
-					vClockDefinition.setSecondReplica(secondReplicaValue+1);
+					int originalValue = vClockDefinition.getOriginalValue();
+					VectorClock old = new VectorClock(vClockDefinition.toString());
+					vClockDefinition.setOriginalValue(originalValue+1);
 					
-					//TODO magic
+					boolean isNewerOrSame = old.isNewerOrSame(old, vClockDefinition);
 					httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
-					Database.getinstance().getSecondReplica().update(hashKey, value, vClockDefinition);
+					if(isNewerOrSame){
+						//TODO magic
+						Database.getinstance().getSecondReplica().update(hashKey, value, vClockDefinition);
+					}
 				}
 				
 				log.info("data patrie mastrovi DATA FROM 2nd replica "+myIp+" TO master: "+nextNode+" and 1st replica: "+secondNode+ " clientIP "+clientIP);
@@ -314,8 +333,11 @@ public class UserAPIRequestProcessing {
 					vClockDefinition.setOriginalValue(originalValue+1);*/
 					VectorClock vClockDefinition;
 					vClockDefinition =  new VectorClock(vectorClock);
-					//TODO magic
-					Database.getinstance().getSecondReplica().update(hashKey, value, vClockDefinition);
+					boolean isNewerOrSame = vClockDefinition.isNewerOrSame(data.getvClock(), vClockDefinition);
+					if(isNewerOrSame){
+						//TODO magic
+						Database.getinstance().getSecondReplica().update(hashKey, value, vClockDefinition);
+					}
 				}
 			}
 		}else{
