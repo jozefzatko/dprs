@@ -37,7 +37,7 @@ public class DatabaseRecord {
 	@Override
 	public String toString() {
 		
-		return this.value + ";" + this.vClock.getvClockDefinition();
+		return this.value + ";" + this.vClock.toString();
 	}
 
 	

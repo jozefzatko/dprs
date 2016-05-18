@@ -135,9 +135,15 @@ public class UserAPIRequestProcessing {
 				}else{
 					VectorClock vClockDefinition =  data.getVectorClock();
 					int originalValue = vClockDefinition.getOriginalValue();
+					VectorClock old = new VectorClock(vClockDefinition.toString());
 					vClockDefinition.setOriginalValue(originalValue+1);
 					
-					//TODO magic
+					boolean isNewerOrSame = old.isNewerOrSame(old, vClockDefinition);
+					/*if(isNewerOrSame){
+						//TODO magic
+						httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
+						Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
+					}*/
 					httpRequest =  httpRequest +"?vclock="+vClockDefinition.toString();
 					Database.getinstance().getMyData().update(hashKey, value, vClockDefinition);
 				}
