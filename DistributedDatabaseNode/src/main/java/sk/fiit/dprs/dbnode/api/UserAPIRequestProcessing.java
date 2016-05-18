@@ -216,7 +216,6 @@ public class UserAPIRequestProcessing {
 				
 				log.info(" DATA FROM 1st replica "+myIp+" TO master: "+nextNode+" and 2nd replica: "+previousNode+ " clientIP "+clientIP);
 				try {
-					httpRequest = 
 					new RESTRequestor("POST", "http://" + nextNode+ httpRequest).request();
 					new RESTRequestor("POST", "http://" + previousNode + httpRequest).request();
 				} catch (IOException e) {

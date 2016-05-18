@@ -68,6 +68,16 @@ public class VectorClock {
 	public void setSecondReplica(int secondReplica) {
 		this.secondReplica = secondReplica;
 	}
+	
+	public boolean isNewerOrSame(VectorClock oldVC, VectorClock newVC){
+		if(oldVC.getOriginalValue()>newVC.getOriginalValue())
+			return false;
+		if(oldVC.getFirstReplica()>newVC.getFirstReplica())
+			return false;
+		if(oldVC.getSecondReplica()>newVC.getSecondReplica())
+			return false;
+		return true;
+	}
 
 	@Override
 	public String toString() {
